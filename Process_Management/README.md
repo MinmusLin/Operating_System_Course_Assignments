@@ -48,7 +48,7 @@
 项目源代码
 
   * `main.py`
-  程序的入口点，负责初始化程序并处理电梯调度逻辑
+  程序入口点，负责初始化程序并处理电梯调度逻辑
 
   * `ui_design.py`
   用户界面的具体实现代码，通过 PyUIC 转换而来
@@ -56,8 +56,33 @@
   * `ui_design.ui`
   描述用户界面的布局和视觉元素，通过 QtDesigner 设计
 
-* `Demonstration.mp4`
-项目演示视频
+* `Demonstration.gif`
+项目演示
+
+* `Program.exe`
+可执行程序
+
+### 1.4 项目运行
+
+#### 1.4.1 通过可执行文件运行
+
+* 双击运行 `Program.exe`
+
+#### 1.4.2 通过 Python 脚本运行
+
+* 搭建 PyQt5 开发环境
+
+* 在 `code` 文件夹激活 PyQt5 conda 环境
+
+  ```bash
+  conda activate pyqt5
+  ```
+
+* 通过 Python 脚本运行程序
+
+  ```bash
+  python ./main.py
+  ```
 
 ## 2 开发环境
 
@@ -213,16 +238,16 @@ class ElevatorTaskState(Enum):
 
 | 函数接口 | 功能 |
 | :--- | :--- |
-| `def __init__(self)` | 初始化窗口类 |
-| `def init_ui_components(self)` | 初始化 UI 组件 |
-| `def console_output(self, message)` | 控制台输出信息 |
-| `def elevator_open_door_button_clicked(self, elevator_index)` | 电梯开门按钮点击事件函数 |
-| `def elevator_close_door_button_clicked(self, elevator_index)` | 电梯关门按钮点击事件函数 |
-| `def elevator_warning_button_clicked(self, elevator_index)` | 电梯报警按钮点击事件函数 |
-| `def to_floor_elevator_button_clicked(self, elevator_index, floor_index)` | 电梯楼层按钮点击事件函数 |
-| `def upward_or_downward_elevator_button_clicked(self, floor_index, move_direction)` | 电梯上行或下行按钮点击事件函数 |
-| `def update_elevator_state(self, elevator_index, floor_index, background_color=BUTTON_DEFAULT_COLOR, message='')` | 更新电梯状态 |
-| `def update(self)` | 窗口更新函数 |
+| `def __init__()` | 初始化窗口类 |
+| `def init_ui_components()` | 初始化 UI 组件 |
+| `def console_output(message)` | 控制台输出信息 |
+| `def elevator_open_door_button_clicked(elevator_index)` | 电梯开门按钮点击事件函数 |
+| `def elevator_close_door_button_clicked(elevator_index)` | 电梯关门按钮点击事件函数 |
+| `def elevator_warning_button_clicked(elevator_index)` | 电梯报警按钮点击事件函数 |
+| `def to_floor_elevator_button_clicked(elevator_index, floor_index)` | 电梯楼层按钮点击事件函数 |
+| `def upward_or_downward_elevator_button_clicked(floor_index, move_direction)` | 电梯上行或下行按钮点击事件函数 |
+| `def update_elevator_state(elevator_index, floor_index, background_color=BUTTON_DEFAULT_COLOR, message='')` | 更新电梯状态 |
+| `def update()` | 窗口更新函数 |
 
 #### 3.3.2 `ElevatorTask` 类（电梯任务类）设计
 
@@ -234,7 +259,7 @@ class ElevatorTaskState(Enum):
 
 | 函数接口 | 功能 |
 | :--- | :--- |
-| `def __init__(self, target_floor, move_direction, task_state=ElevatorTaskState.PENDING)` | 初始化电梯任务类 |
+| `def __init__(target_floor, move_direction, task_state=ElevatorTaskState.PENDING)` | 初始化电梯任务类 |
 
 #### 3.3.3 `ElevatorThread` 类（电梯进程类）设计
 
@@ -246,11 +271,11 @@ class ElevatorTaskState(Enum):
 
 | 函数接口 | 功能 |
 | :--- | :--- |
-| `def __init__(self, elevator_index)` | 初始化电梯进程类 |
-| `def floor_travel(self, move_direction)` | 电梯上下楼操作 |
-| `def door_toggle(self)` | 电梯开关门操作 |
-| `def warning_handler(self)` | 电梯报警处理 |
-| `def run(self)` | 运行电梯线程 |
+| `def __init__(elevator_index)` | 初始化电梯进程类 |
+| `def floor_travel(move_direction)` | 电梯上下楼操作 |
+| `def door_toggle()` | 电梯开关门操作 |
+| `def warning_handler()` | 电梯报警处理 |
+| `def run()` | 运行电梯线程 |
 
 #### 3.3.4 `ElevatorController` 类（电梯控制类）设计
 
@@ -262,10 +287,10 @@ class ElevatorTaskState(Enum):
 
 | 函数接口 | 功能 |
 | :--- | :--- |
-| `def __init__(self)` | 初始化电梯控制类 |
+| `def __init__()` | 初始化电梯控制类 |
 | `def allocate_elevator(elevator_task)` | 为电梯任务分配电梯 |
 | `def add_elevator_task(elevator_index, elevator_task, descending=False)` | 添加电梯任务 |
-| `def run(self)` | 运行电梯控制进程 |
+| `def run()` | 运行电梯控制进程 |
 
 ### 3.4 电梯调度算法设计
 
@@ -298,7 +323,118 @@ class ElevatorTaskState(Enum):
 * **智能决策**：算法考虑了电梯的当前运行状态和方向，更加智能地匹配任务，减少了不必要的电梯运行时间。
 * **动态调整**：算法能够动态地根据电梯的实时状态进行调整，使得电梯调度更加灵活和适应性强。
 
-### 3.5 用户交互设计
+### 3.5 用户交互界面设计
+
+#### 3.5.1 用户交互界面设计概述
+
+本电梯调度程序使用 QtDesigner 设计了用户友好的交互界面。界面组成部分及相关 Qt 组件如下：
+
+* 标题区（ `QLabel` ）
+* 作者信息区（ `QLabel` ）
+* 外部控制面板
+  * 楼层显示提示（ `QLabel` ）
+  * 上行电梯按钮（ `QPushButton` ）
+  * 下行电梯按钮（ `QPushButton` ）
+* 电梯控制面板
+  * 电梯楼层显示屏（ `QLabel` 和 `QLCDNumber` ）
+  * 电梯运行状态显示区（ `QListWidget` ）
+  * 电梯楼层按钮（ `QPushButton` ）
+  * 电梯关门按钮（ `QPushButton` ）
+  * 电梯开门按钮（ `QPushButton` ）
+  * 电梯报警按钮（ `QPushButton` ）
+* 控制台窗口（ `QLabel` 和 `QPlainTextEdit` ）
+
+![](assets/2024-05-07_17-20-12.png)
+
+#### 3.5.2 用户交互界面设计理念
+
+本电梯调度程序的用户交互界面考虑了多个电梯的管理和监控需求，使用了 QtDesigner 进行设计，确保**用户友好性**和**功能全面性**。
+
+本项目的用户交互界面设计理念如下：
+
+* **清晰的模块划分**：界面清晰地将每个电梯的控制面板分开显示，每个模块包含单独的楼层按钮、电梯运行状态显示和控制按钮（如门控、警报等），这种布局使得操作者可以快速、直观地管理和监控多部电梯的状态。
+* **直观的楼层导航**：每部电梯旁边的楼层按钮清晰标注，配有上下行箭头按钮，使用户可以轻松设置电梯的目的楼层。这种设计减少了操作的复杂性，提升了界面的用户友好度。
+* **实时状态反馈**：通过底部的控制台窗口和电梯运行状态显示区，实时显示电梯的运行日志和状态变更，增强了操作的透明度和可追踪性。
+* **一致性与可访问性**：界面的风格和操作逻辑在各个部分保持一致，使用了标准化的 Qt 组件，如 `QPushButton` 、 `QLabel` 、 `QLCDNumber` 等，这不仅确保了界面的美观性，也保证了不同用户的易用性。
+* **紧急措施可用性**：每部电梯控制面板均配备有报警按钮，确保在紧急情况下可以快速作出反应，提高了系统的安全性。
+
+#### 3.5.3 用户交互界面设计亮点
+
+##### 3.5.3.1 外部控制面板设计亮点
+
+外部控制面板设计亮点如下：
+
+* 对每一层提供了清晰的楼层提示
+* 按钮被点击和未被点击的状态具有统一的样式
+* 点击上行或下行电梯按钮时提供高亮显示，并且该按钮在当前请求完成之前不可以重复点击（禁用状态），该按钮在当前请求完成之后恢复启用状态
+* 底层的下行电梯按钮和顶层的上行电梯按钮始终不可点击（禁用状态）
+* 使用符号 `▲` 和 `▼` 为电梯按钮的功能提供直观显示
+
+![](assets/2024-05-07_19-54-30.png) ![](assets/2024-05-07_19-55-21.png)
+
+##### 3.5.3.2 电梯控制面板设计亮点
+
+电梯控制面板设计亮点如下：
+
+* 电梯楼层显示屏实时显示当前电梯索引和电梯所处楼层，清晰直观
+* 对每一层提供了清晰的楼层提示
+* 按钮被点击和未被点击的状态具有统一的样式
+* 点击电梯楼层按钮时提供高亮显示，并且该按钮在当前请求完成之前不可以重复点击（禁用状态），该按钮在当前请求完成之后恢复启用状态
+* 使用符号 `▶|◀` 、 `◀|▶` 和 `🔔` 为电梯按钮的功能提供直观显示
+* 当电梯进入报警状态时，电梯报警按钮提供高亮显示，电梯楼层按钮和开关门按钮被禁用，不可点击
+* 当电梯退出报警状态时，电梯报警按钮取消高亮显示，电梯楼层按钮和开关门按钮被启用，可以点击
+* 电梯运行状态显示区动态显示电梯当前所处楼层和电梯运行状态，并提供色彩区分
+  * 电梯静止状态，背景颜色浅蓝色
+  * 电梯上行状态，背景颜色浅蓝色，显示文字“上行中”
+  * 电梯下行状态，背景颜色浅蓝色，显示文字“下行中”
+  * 电梯开门状态，背景颜色浅绿色，显示文字“开门中”
+  * 电梯等待状态，背景颜色浅绿色，显示文字“等待中”
+  * 电梯关门状态，背景颜色浅绿色，显示文字“关门中”
+  * 电梯报警状态，背景颜色浅红色
+
+![](assets/2024-05-07_20-13-30.png)
+
+![](assets/2024-05-07_20-17-21.png)
+
+![](assets/2024-05-07_20-57-45.png)
+
+##### 3.5.3.3 控制台窗口设计亮点
+
+控制台窗口是电梯调度系统中一个关键的界面元素，其设计精细且功能丰富，为操作者提供了全面的系统运行信息，确保了操作的高效性和透明度。
+
+![](assets/2024-05-07_20-59-44.png)
+
+控制台窗口设计亮点：
+
+* **实时信息输出**：通过 `MainWindow` 类的 `console_output` 方法，系统可以将关键操作和状态变更实时输出到控制台窗口，使操作者能够即时获取电梯的运行状态，包括电梯的上下行动作、门的开关状态以及电梯报警状态等。这种实时反馈对于维护电梯的正常运行和及时响应潜在问题至关重要。
+* **事件时间标记**：每个输出信息前都标注有发生时间，格式为 `[日期时间]` ，这不仅有助于记录和回顾事件发生的具体时刻，也使得问题诊断和系统监控更为方便和有效。时间戳的精确记录是系统透明度和可追踪性的关键因素。
+* **广泛的事件覆盖**：控制台窗口能够输出广泛的事件信息，包括但不限于电梯的请求处理、位置更新、门操作处理及报警状态变更。这样的设计确保了系统每一个重要动作都能被记录和显示，极大地增强了系统的可管理性和用户对系统状态的掌握。
+* **故障与警报处理**：特别是在电梯遇到故障或用户触发报警时，控制台窗口能够快速地显示相关信息。
+
+```python
+console_output('电梯控制进程已运行')
+console_output(f'{elevator_index + 1}号电梯收到上行请求：前往{floor_index + 1}层')
+console_output(f'{elevator_index + 1}号电梯收到下行请求：前往{floor_index + 1}层')
+console_output(f'{elevator_index + 1}号电梯位于{floor_index + 1}层')
+console_output(f'{elevator_index + 1}号电梯进程已运行')
+console_output(f'{elevator_index + 1}号电梯正在下行，无法开门')
+console_output(f'{elevator_index + 1}号电梯已开门')
+console_output(f'{elevator_index + 1}号电梯正在上行，无法开门')
+console_output(f'{elevator_index + 1}号电梯处于报警状态')
+console_output(f'{elevator_index + 1}号电梯正在开关门')
+console_output(f'{elevator_index + 1}号电梯正在下行，无法关门')
+console_output(f'{elevator_index + 1}号电梯已关门')
+console_output(f'{elevator_index + 1}号电梯正在上行，无法关门')
+console_output(f'{elevator_index + 1}号电梯处于报警状态')
+console_output(f'{elevator_index + 1}号电梯正在开关门')
+console_output(f'{elevator_index + 1}号电梯退出报警状态')
+console_output(f'{elevator_index + 1}号电梯进入报警状态')
+console_output(f'{elevator_index + 1}号电梯返回1层')
+console_output(f'{elevator_index + 1}号电梯处于报警状态')
+console_output(f'{floor_index + 1}层发出上行请求')
+console_output(f'{floor_index + 1}层发出下行请求')
+console_output('所有电梯均处于报警状态')
+```
 
 ## 4 项目实现
 
@@ -545,9 +681,266 @@ def allocate_elevator(elevator_task):
     return target_elevator_index
 ```
 
+### 4.4 状态更新实现
+
+#### 4.4.1 更新电梯状态实现
+
+`update_elevator_state` 方法用于更新电梯的状态信息，显示在相应的用户界面组件上。该方法的实现步骤如下：
+
+* **创建 `QBrush` 对象**：首先，使用传入的 RGB 颜色值创建一个 `QBrush` 对象。这个对象用来设置列表项的背景色。 `QColor(*background_color)` 创建一个颜色对象， `*background_color` 表示将 RGB 元组解包为单独的参数。
+* **设置画刷样式**：通过 `itemBrush.setStyle(QtCore.Qt.SolidPattern)` 设置画刷的样式为实心填充，这样整个列表项的背景都会被填充为指定的颜色。
+* **获取列表项**：使用 `self.elevator_list_widget[elevator_index].item(FLOOR_NUM - 1 - floor_index)` 获取对应电梯的楼层列表中特定楼层的项。这里 `FLOOR_NUM - 1 - floor_index` 计算得到的是从列表顶部开始的楼层位置。
+* **更新列表项的背景和文本**：调用 `item.setBackground(itemBrush)` 设置列表项的背景色。使用 `item.setText(message)` 设置列表项的文本内容，以反映最新的电梯状态信息。
+
+```python
+def update_elevator_state(self, elevator_index, floor_index, background_color=BUTTON_DEFAULT_COLOR, message=''):
+    """
+    更新电梯状态
+
+    :param elevator_index: 电梯索引
+    :type elevator_index: int
+    :param floor_index: 楼层索引
+    :type floor_index: int
+    :param background_color: 背景颜色
+    :type background_color: rgb
+    :param message: 信息
+    :type message: str
+    """
+    itemBrush = QtGui.QBrush(QtGui.QColor(*background_color))
+    itemBrush.setStyle(QtCore.Qt.SolidPattern)
+    item = self.elevator_list_widget[elevator_index].item(FLOOR_NUM - 1 - floor_index)
+    item.setBackground(itemBrush)
+    item.setText(message)
+```
+
+#### 4.4.2 窗口更新函数实现
+
+`update` 方法的主要目的是更新电梯调度系统中各电梯的显示状态和控制界面。以下是函数的主要实现细节和步骤：
+
+* **线程安全**：首先，使用 `mutex.lock() `和 `mutex.unlock()` 来保证数据的一致性和线程安全。在修改共享资源（如电梯状态和控制按钮）之前先加锁，修改完成后再解锁。这是多线程编程中常用的方式来防止数据竞争。
+* **更新电梯楼层显示**： `self.elevator_lcd_number[elevator_index].display(str(elevator_current_floor[elevator_index] + 1))` 更新电梯的当前楼层显示。电梯索引 `elevator_index` 用于指定是哪一部电梯， `elevator_current_floor` 数组存储了各电梯的当前楼层。
+* **更新电梯门状态**：如果电梯处于门操作状态（ `ElevatorState.DOOR_OPERATING` ），则更新相关电梯的楼层按钮的启用状态，并根据电梯门操作的进度（ `elevator_door_operating_progress` ）更新门的状态显示（开门中、等待中、关门中）。
+* **电梯呼叫按钮状态**：在解锁之后，更新所有上行和下行的电梯呼叫按钮的状态，使得顶楼的上行按钮和底楼的下行按钮不可用，其它按钮则根据当前电梯任务的状态进行启用或禁用，并设置相应的样式。
+* **更新任务中的电梯状态**：再次加锁后，遍历 `elevator_task_list` 列表，根据每个任务的状态和方向，更新对应楼层按钮的启用状态和样式。
+* **更新电梯运行状态**：电梯运行状态更新：最后一次加锁用于更新每部电梯的运行状态。根据电梯的状态（上行、下行、静止但不是门操作或警告状态），调用 `update_elevator_state` 方法更新状态显示。还包括了对于电梯上下两个楼层状态的更新，可能用于清除之前楼层的状态显示或者准备更新下一个状态。
+* **解锁**：最终解锁，确保所有状态更新完成后释放互斥锁。
+
+```python
+def update(self):
+    """
+    窗口更新函数
+    """
+    mutex.lock()
+
+    for elevator_index in range(ELEVATOR_NUM):
+        self.elevator_lcd_number[elevator_index].display(str(elevator_current_floor[elevator_index] + 1))
+        if elevator_state[elevator_index] == ElevatorState.DOOR_OPERATING:
+            self.to_floor_elevator_button[elevator_index][elevator_current_floor[elevator_index]].setEnabled(True)
+            if elevator_door_operating_progress[elevator_index] < 1 / 4:
+                self.update_elevator_state(elevator_index,
+                                            elevator_current_floor[elevator_index],
+                                            ELEVATOR_DOOR_COLOR,
+                                            '开门中')
+            elif elevator_door_operating_progress[elevator_index] < 3 / 4:
+                self.update_elevator_state(elevator_index,
+                                            elevator_current_floor[elevator_index],
+                                            ELEVATOR_DOOR_COLOR,
+                                            '等待中')
+            else:
+                self.update_elevator_state(elevator_index,
+                                            elevator_current_floor[elevator_index],
+                                            ELEVATOR_DOOR_COLOR,
+                                            '关门中')
+
+    mutex.unlock()
+
+    for button in self.upward_elevator_button:
+        button.setEnabled(True)
+        button.setStyleSheet('')
+    for button in self.downward_elevator_button:
+        button.setEnabled(True)
+        button.setStyleSheet('')
+    self.upward_elevator_button[FLOOR_NUM - 1].setEnabled(False)
+    self.downward_elevator_button[0].setEnabled(False)
+
+    mutex.lock()
+
+    for elevator_task in elevator_task_list:
+        if elevator_task.task_state != ElevatorTaskState.COMPLETED:
+            if elevator_task.move_direction == ElevatorState.UPWARD:
+                self.upward_elevator_button[elevator_task.target_floor].setEnabled(False)
+                self.upward_elevator_button[elevator_task.target_floor].setStyleSheet(BUTTON_CLICKED_STYLE)
+            elif elevator_task.move_direction == ElevatorState.DOWNWARD:
+                self.downward_elevator_button[elevator_task.target_floor].setEnabled(False)
+                self.downward_elevator_button[elevator_task.target_floor].setStyleSheet(BUTTON_CLICKED_STYLE)
+
+    mutex.unlock()
+
+    mutex.lock()
+
+    for elevator_index in range(ELEVATOR_NUM):
+        if elevator_state[elevator_index] != ElevatorState.WARNING:
+            if elevator_state[elevator_index] != ElevatorState.DOOR_OPERATING:
+                if elevator_state[elevator_index] == ElevatorState.UPWARD:
+                    self.update_elevator_state(elevator_index,
+                                                elevator_current_floor[elevator_index],
+                                                ELEVATOR_RUNNING_COLOR,
+                                                '上行中')
+                elif elevator_state[elevator_index] == ElevatorState.DOWNWARD:
+                    self.update_elevator_state(elevator_index,
+                                                elevator_current_floor[elevator_index],
+                                                ELEVATOR_RUNNING_COLOR,
+                                                '下行中')
+                else:
+                    self.update_elevator_state(elevator_index,
+                                                elevator_current_floor[elevator_index],
+                                                ELEVATOR_RUNNING_COLOR)
+            if elevator_current_floor[elevator_index] > 0:
+                self.update_elevator_state(elevator_index, elevator_current_floor[elevator_index] - 1)
+            if elevator_current_floor[elevator_index] < FLOOR_NUM - 1:
+                self.update_elevator_state(elevator_index, elevator_current_floor[elevator_index] + 1)
+
+    mutex.unlock()
+```
+
+### 4.5 进程管理实现
+
+进程管理在电梯调度系统中是一个关键组成部分，它确保了系统的高效与稳定运行。通过 Python 的 `QThread` 类和互斥锁（ `mutex` ）的使用，可以实现多线程环境下的资源同步和任务调度。以下是电梯调度系统中进程管理实现的几个主要方面。
+
+#### 4.5.1 `QThread` 编程
+
+`QThread` 是 Qt 框架中用于多线程编程的类。在 Python 的 PyQt5 库中， `QThread` 可以用来创建和管理线程。每个线程可以执行独立的任务，如控制一个电梯的运动或处理整个电梯系统的调度。在代码中，有两个主要的 `QThread` 派生类：
+
+* **`ElevatorThread` 类**：负责单个电梯的运动控制，包括楼层旅行、门的开关操作、警告处理等。
+* **`ElevatorController` 类**：负责管理所有电梯的调度，分配任务给特定的电梯，并更新任务状态。
+
+通过重写 `QThread` 的 `run` 方法，可以定义线程在启动后将执行的操作。例如， `ElevatorThread` 的 `run` 方法包含一个无限循环，循环中根据电梯的当前状态执行相应的操作。
+
+#### 4.5.2 互斥锁 `Mutex`
+
+在多线程环境中，互斥锁（ `mutex` ）是用来防止多个线程同时访问共享资源（如电梯的当前楼层、状态等），从而避免数据冲突和不一致的情况。在代码中， `mutex.lock()` 和 `mutex.unlock()` 用于在访问或修改共享资源前后锁定和解锁资源，确保每次只有一个线程可以操作这些资源。
+
+例如，在 `ElevatorController` 的 `run` 方法中，循环体首先锁定互斥锁，然后处理电梯任务列表中的每一个任务，分配电梯执行任务，并在任务分配完成后更新任务列表，最后解锁互斥锁。
+
+#### 4.5.3 进程的任务处理和调度
+
+在电梯系统中，每个电梯的操作（如上升、下降、开门、关门）和电梯的任务分配都需要精确控制。 `ElevatorThread` 通过检查自身的任务队列来决定下一步的动作，而 `ElevatorController` 则根据电梯的当前位置和目标任务来动态分配任务。
+
+* **任务队列处理**：电梯的上行和下行队列决定了电梯接下来的运动方向。例如，如果上行队列中有楼层请求，并且当前楼层是队列中的第一个目标楼层，则电梯将执行开门操作，然后将该任务标记为完成，并从队列中移除。
+* **动态任务分配**： `ElevatorController` 通过评估每个电梯的当前状态和位置来决定哪部电梯最适合执行新的任务，从而优化整个系统的效率和响应速度。
+
+#### 4.5.4 运行电梯进程代码（电梯进程类）
+
+```python
+class ElevatorThread(QThread):
+    ...
+
+    def run(self):
+        """
+        运行电梯线程
+        """
+        while True:
+            mutex.lock()
+            if elevator_state[self.elevator_index] == ElevatorState.WARNING:
+                self.warning_handler()
+                mutex.unlock()
+                continue
+
+            if move_directions[self.elevator_index] == ElevatorState.UPWARD:
+                if elevator_up_queue[self.elevator_index]:
+                    if elevator_up_queue[self.elevator_index][0] == elevator_current_floor[self.elevator_index]:
+                        self.door_toggle()
+                        for outer_task in elevator_task_list:
+                            if outer_task.target_floor == elevator_current_floor[self.elevator_index]:
+                                outer_task.task_state = ElevatorTaskState.COMPLETED
+                                break
+                        if elevator_up_queue:
+                            elevator_up_queue[self.elevator_index].pop(0)
+                    elif elevator_up_queue[self.elevator_index][0] > elevator_current_floor[self.elevator_index]:
+                        self.floor_travel(ElevatorState.UPWARD)
+                elif elevator_up_queue[self.elevator_index] == [] and elevator_down_queue[self.elevator_index] != []:
+                    move_directions[self.elevator_index] = ElevatorState.DOWNWARD
+
+            elif move_directions[self.elevator_index] == ElevatorState.DOWNWARD:
+                if elevator_down_queue[self.elevator_index]:
+                    if elevator_down_queue[self.elevator_index][0] == elevator_current_floor[self.elevator_index]:
+                        self.door_toggle()
+                        for outer_task in elevator_task_list:
+                            if outer_task.target_floor == elevator_current_floor[self.elevator_index]:
+                                outer_task.task_state = ElevatorTaskState.COMPLETED
+                                break
+                        if elevator_down_queue:
+                            elevator_down_queue[self.elevator_index].pop(0)
+                    elif elevator_down_queue[self.elevator_index][0] < elevator_current_floor[self.elevator_index]:
+                        self.floor_travel(ElevatorState.DOWNWARD)
+                elif elevator_down_queue[self.elevator_index] == [] and elevator_up_queue[self.elevator_index] != []:
+                    move_directions[self.elevator_index] = ElevatorState.UPWARD
+
+            mutex.unlock()
+```
+
+#### 4.5.5 运行控制进程代码（电梯控制类）
+
+```python
+class ElevatorController(QThread):
+    ...
+
+    def run(self):
+        """
+        运行电梯控制进程
+        """
+        while True:
+            global elevator_task_list
+
+            mutex.lock()
+
+            for outer_task in elevator_task_list:
+                if outer_task.task_state == ElevatorTaskState.PENDING:
+                    target_id = self.allocate_elevator(outer_task)
+                    if ((elevator_current_floor[target_id] == outer_task.target_floor
+                         and outer_task.move_direction == ElevatorState.UPWARD
+                         and elevator_state[target_id] != ElevatorState.UPWARD)
+                            or elevator_current_floor[target_id] < outer_task.target_floor):
+                        self.add_elevator_task(target_id, outer_task)
+                    elif ((elevator_current_floor[target_id] == outer_task.target_floor
+                           and outer_task.move_direction == ElevatorState.DOWNWARD
+                           and elevator_state[target_id] != ElevatorState.DOWNWARD)
+                          or elevator_current_floor[target_id] > outer_task.target_floor):
+                        self.add_elevator_task(target_id, outer_task, descending=True)
+
+            elevator_task_list = [task for task in elevator_task_list if task.task_state != ElevatorTaskState.COMPLETED]
+
+            mutex.unlock()
+```
+
 ## 5 项目展示
 
+![](Demonstration.gif)
+
 ## 6 项目总结
+
+在这个电梯调度系统项目中，我们通过综合运用多线程编程、互斥锁和进程管理等技术，成功实现了一个高效、稳定且用户友好的电梯控制系统。以下是对项目的总结：
+
+### 6.1 多线程编程
+
+电梯调度系统中使用了多线程编程技术，每部电梯由一个独立的线程（ `ElevatorThread` ）控制，而整个电梯系统的调度由一个中央控制线程（ `ElevatorController` ）管理。这种设计允许每部电梯独立操作，同时由中央控制器协调各电梯之间的任务和运动，提高了系统的响应速度和效率。
+
+* **线程安全**：为了确保线程之间的数据共享不会导致冲突，使用了互斥锁（ `mutex` ）来控制对共享资源的访问。这保证了在修改如电梯当前楼层、电梯状态等关键信息时的线程安全。
+* **资源高效管理**：每个电梯线程根据当前任务动态调整其行为，如楼层移动和门的开关操作。中央控制线程不断分配和更新任务，使得资源分配更为高效。
+
+### 6.2 互斥锁
+
+项目中广泛使用了互斥锁来处理资源共享问题，特别是在涉及到多个线程同时访问和修改相同数据（如电梯的位置、状态等）时。互斥锁的使用确保了在任何时刻，只有一个线程可以修改共享资源，从而避免了数据竞态和不一致性。
+
+* **锁的正确使用**：代码中多次出现 `mutex.lock()` 和 `mutex.unlock()` 的模式，这不仅保护了数据的一致性，也确保了系统在并发环境下的稳定运行。
+* **性能和安全的平衡**：虽然互斥锁能够保证数据安全，但过度使用可能导致性能瓶颈。项目中合理的锁使用策略有效平衡了性能与安全。
+
+### 6.3 进程管理
+
+通过精心设计的进程管理策略，本项目实现了复杂的业务需求，即多电梯的调度和管理。进程管理主要涉及以下几个方面：
+
+* **任务调度**：中央控制进程根据各电梯的当前状态和楼层位置，动态地为电梯分配上行或下行的任务。这种动态调度策略提高了电梯运行的效率，并减少了等待时间。
+* **状态更新**：电梯进程负责实时更新其状态，如当前楼层和门的状态，以及响应中央控制进程的调度命令。每个电梯的状态更新对系统的整体性能至关重要。
 
 ## 7 文档更新日期
 
