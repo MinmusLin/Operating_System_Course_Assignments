@@ -1,7 +1,5 @@
 # Process Management
 
-[TOC]
-
 ## 1 项目介绍
 
 ### 1.1 项目简介
