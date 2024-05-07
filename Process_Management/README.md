@@ -1,8 +1,10 @@
 # Process Management
 
-## 项目介绍
+[TOC]
 
-### 项目简介
+## 1 项目介绍
+
+### 1.1 项目简介
 
 **Process management: Elevator scheduling**
 
@@ -23,7 +25,7 @@
   * 系统采用多线程技术，每部电梯由一个独立的线程控制，以模拟电梯的独立运行和实时响应。
   * 程序应包括错误处理和状态监测，以保证系统在各种情况下的稳定运行。
 
-### 项目目的
+### 1.2 项目目的
 
 * **操作系统调度模拟**
   * 电梯调度系统可以看作是一个操作系统进程调度的微缩模型。在这个系统中，每部电梯都可以视为一个进程，电梯调度算法则模拟了操作系统的进程调度器。
@@ -37,7 +39,7 @@
 * **实践中的理论应用**
   * 通过实际编写和测试电梯调度系统，可以将理论知识转化为实践经验，更好地理解诸如线程安全、竞态条件和死锁等并发编程问题。
 
-### 项目组成
+### 1.3 项目组成
 
 * `/assets`
 存放 `README.md` 文件所需的相关图片资源
@@ -57,9 +59,9 @@
 * `Demonstration.mp4`
 项目演示视频
 
-## 开发环境
+## 2 开发环境
 
-### 开发环境概述
+### 2.1 开发环境概述
 
 本项目的开发环境如下：
 
@@ -74,11 +76,9 @@
 * 开发语言
   * Python 3.8.0
 
-### 开发环境搭建
+### 2.2 开发环境搭建
 
 * 从[官方网站](https://www.anaconda.com)下载并安装 Anaconda
-
-  ![](assets/2024-04-25_16-43-10.png)
 
 * 查找 Anaconda 安装目录。定位系统中Anaconda安装的目录，通常在 Windows 系统上是这样的路径： `C:\Users\<Username>\Anaconda3`
 
@@ -95,8 +95,6 @@
   * 重启计算机以应用更改
 
 * 验证安装。设置环境变量后，打开一个新的终端或命令提示符窗口，输入 `conda --version` 来验证 Anaconda 现在是否已经在系统的 `PATH` 中，并且可以从任何目录访问
-
-  ![](assets/2024-05-07_03-59-08.png)
 
 * 更新 conda 包，此命令将当前 conda 环境中的所有包更新到最新版本
 
@@ -127,9 +125,6 @@
   ![](assets/2024-05-07_04-06-54.png)
 
 * 转到 `设置` > `工具` > `外部工具` ，分别对 QtDesigner、PyUIC、PyRCC 进行如下设置（路径应根据本机路径进行改动）：
-
-  ![](assets/2024-05-07_04-10-09.png)
-
   * QtDesigner
     * 程序： `C:\Users\lenovo\miniconda3\envs\pyqt5\Lib\site-packages\qt5_applications\Qt\bin\designer.exe`
     * 实参：无
@@ -145,13 +140,171 @@
 
 至此，本项目的开发环境搭建完成。
 
-## 项目设计
+## 3 项目设计
 
-### 程序主体架构设计
+### 3.1 程序主体架构设计
 
-### 常变量和全局变量设计
+```mermaid
+graph LR
+A(ElevatorTask\n电梯任务类) <---> B(ElevatorController\n电梯控制类)
+A(ElevatorTask\n电梯任务类) <---> C(ElevatorThread\n电梯进程类)
+B(ElevatorController\n电梯控制类) ---> D(MainWindow\n窗口类)
+C(ElevatorThread\n电梯进程类) ---> D(MainWindow\n窗口类)
+```
 
-#### 常变量设计
+在电梯调度系统中，四个核心类 `ElevatorTask` 、 `ElevatorController` 、 `ElevatorThread` 和 `MainWindow` 通过精心设计的接口和明确的责任分工协同工作，确保电梯调度系统的高效运行和用户界面的交互性。以下程序主体架构设计：
+
+* **`ElevatorTask`（电梯任务类）**
+  * 此类定义了电梯的运行任务，包括目标楼层、运行方向和任务状态。
+  * 它作为任务信息的封装，被 `ElevatorController` 用来分配任务到合适的电梯，并被 `ElevatorThread` 用来实际执行这些任务。
+* **`ElevatorController`（电梯控制类）**
+  * 作为电梯调度的中心，此类负责决定哪一个电梯来执行哪一个任务。
+  * 它根据电梯当前的状态、位置以及任务的方向和位置，采用算法选择最合适的电梯来完成任务。
+  * 它还负责将任务添加到选定电梯的队列中，这些操作通过 `ElevatorTask` 类的实例进行管理。
+* **`ElevatorThread`（电梯进程类）**
+  * 每个电梯都由一个 `ElevatorThread` 实例在后台运行，模拟电梯的物理运动（上下移动和开关门操作）。
+  * 这个类使用 `ElevatorTask` 实例来获取其应执行的具体任务，并按照 `ElevatorController` 的调度执行。
+  * 它周期性地更新电梯的当前楼层和状态，同时检查并响应任何可能的报警状态。
+* **`MainWindow`（窗口类）**
+  * 这是用户交互的界面，使用 PyQt5 创建。
+  * 它展示电梯的当前状态，接收用户的输入（如电梯楼层按钮的点击），并显示电梯的实时运动。
+  * 用户界面通过与 `ElevatorThread` 的交互更新电梯的状态显示，并通过 `ElevatorController` 接收新的用户请求，转换为 `ElevatorTask` 并进行处理。
+
+通过这样的设计，MainWindow提供了一个直观的界面让用户与电梯系统交互，ElevatorController作为调度中心合理地分配任务给适当的电梯，而ElevatorThread确保电梯按预定任务运行。ElevatorTask则在这一切中扮演了任务数据的携带者和传递者的角色。这种架构不仅确保了系统的模块化和扩展性，也提高了电梯调度系统的效率和响应速度。
+
+### 3.2 枚举类设计
+
+在电梯调度系统中，使用枚举类来表示电梯状态和任务状态。主要出于以下几点考虑：
+
+  * 枚举类的命名常量提高了代码的可读性和可维护性，使状态信息一目了然。
+  * 枚举限定值集合，有助于减少无效状态值的使用，从而降低代码中的错误风险。
+  * 枚举使状态的比较和验证更为便捷和准确，在逻辑判断中可以直接使用枚举常量进行匹配。
+  * 枚举将相关常数封装在一起，有助于组织和管理电梯调度系统中的状态和任务状态，实现清晰的逻辑结构。
+
+#### 3.2.1 电梯运行状态枚举类
+
+```python
+class ElevatorState(Enum):
+    DOWNWARD = -1  # 电梯下行状态
+    STATIONARY = 0  # 电梯静止状态
+    UPWARD = 1  # 电梯上行状态
+    WARNING = 2  # 电梯报警状态
+    DOOR_OPERATING = 3  # 电梯开关门状态
+```
+
+#### 3.2.2 电梯任务状态枚举类
+
+```python
+class ElevatorTaskState(Enum):
+    PENDING = 0  # 任务尚未分配状态
+    IN_PROGRESS = 1  # 任务正在等待状态
+    COMPLETED = 2  # 任务已完成状态
+```
+
+### 3.3 类设计
+
+#### 3.3.1 `MainWindow` 类（窗口类）设计
+
+##### 3.3.1.1 类概述
+
+`MainWindow` 类负责使用 PyQt5 创建一个功能齐全的电梯调度系统的主窗口。它定义并初始化各种电梯控制组件，包括楼层显示屏、开门和关门按钮、报警按钮以及电梯内外的楼层请求按钮。它通过连接按钮点击事件的回调函数来处理用户的电梯请求，并通过定时器周期性更新电梯状态和界面。该类集成了控制台输出、按钮交互，以模拟多部电梯的正常运行、上下行调度和状态报警等功能。
+
+##### 3.3.1.2 函数接口设计
+
+| 函数接口 | 功能 |
+| :--- | :--- |
+| `def __init__(self)` | 初始化窗口类 |
+| `def init_ui_components(self)` | 初始化 UI 组件 |
+| `def console_output(self, message)` | 控制台输出信息 |
+| `def elevator_open_door_button_clicked(self, elevator_index)` | 电梯开门按钮点击事件函数 |
+| `def elevator_close_door_button_clicked(self, elevator_index)` | 电梯关门按钮点击事件函数 |
+| `def elevator_warning_button_clicked(self, elevator_index)` | 电梯报警按钮点击事件函数 |
+| `def to_floor_elevator_button_clicked(self, elevator_index, floor_index)` | 电梯楼层按钮点击事件函数 |
+| `def upward_or_downward_elevator_button_clicked(self, floor_index, move_direction)` | 电梯上行或下行按钮点击事件函数 |
+| `def update_elevator_state(self, elevator_index, floor_index, background_color=BUTTON_DEFAULT_COLOR, message='')` | 更新电梯状态 |
+| `def update(self)` | 窗口更新函数 |
+
+#### 3.3.2 `ElevatorTask` 类（电梯任务类）设计
+
+##### 3.3.2.1 类概述
+
+`ElevatorTask` 类负责定义一个电梯调度任务，包含目标楼层、运行方向以及任务状态的属性。它通过 `target_floor` 指定电梯目标楼层， `move_direction` 决定电梯的运行方向（上行或下行），并用 `task_state` 表示当前任务的状态，如等待执行或已完成。此类的实例用于管理和协调不同楼层的电梯请求，在电梯调度系统中发挥重要的调度作用。
+
+##### 3.3.2.2 函数接口设计
+
+| 函数接口 | 功能 |
+| :--- | :--- |
+| `def __init__(self, target_floor, move_direction, task_state=ElevatorTaskState.PENDING)` | 初始化电梯任务类 |
+
+#### 3.3.3 `ElevatorThread` 类（电梯进程类）设计
+
+##### 3.3.3.1 类概述
+
+`ElevatorThread` 类负责模拟电梯的独立运行进程，通过继承 `QThread` 提供多线程并行处理的能力。该类使用电梯索引来跟踪每个电梯的状态，并提供电梯在楼层间移动（ `floor_travel` ）、开关门（ `door_toggle` ）和报警处理（ `warning_handler` ）的功能。线程的主要循环（ `run` 方法）会根据当前任务队列动态地调整电梯的运行方向，优先执行与当前电梯状态一致的楼层请求，同时监控可能出现的报警状态并及时处理。这一类旨在确保多部电梯在调度程序中协同工作，有效响应各个楼层的内部和外部请求。
+
+##### 3.3.3.2 函数接口设计
+
+| 函数接口 | 功能 |
+| :--- | :--- |
+| `def __init__(self, elevator_index)` | 初始化电梯进程类 |
+| `def floor_travel(self, move_direction)` | 电梯上下楼操作 |
+| `def door_toggle(self)` | 电梯开关门操作 |
+| `def warning_handler(self)` | 电梯报警处理 |
+| `def run(self)` | 运行电梯线程 |
+
+#### 3.3.4 `ElevatorController` 类（电梯控制类）设计
+
+##### 3.3.4.1 类概述
+
+`ElevatorController` 类继承自 `QThread` ，用于提供电梯调度的核心逻辑。它在 `allocate_elevator` 方法中基于当前电梯的运行状态、任务方向以及楼层距离来为每个任务选择最合适的电梯，并通过 `add_elevator_task` 将任务添加到对应电梯的请求队列中。该类的 `run` 方法会不断循环检查任务列表，根据任务的状态、方向和楼层来合理分配和调整电梯的任务队列。通过这种方式， `ElevatorController` 确保多部电梯高效运行、协同处理各楼层的请求，实现了电梯系统的智能调度。
+
+##### 3.3.4.2 函数接口设计
+
+| 函数接口 | 功能 |
+| :--- | :--- |
+| `def __init__(self)` | 初始化电梯控制类 |
+| `def allocate_elevator(elevator_task)` | 为电梯任务分配电梯 |
+| `def add_elevator_task(elevator_index, elevator_task, descending=False)` | 添加电梯任务 |
+| `def run(self)` | 运行电梯控制进程 |
+
+### 3.4 电梯调度算法设计
+
+本项目实现了一个电梯调度算法，以为新的电梯任务找到一个最合适的电梯来执行该任务，即寻找距离目标楼层最近的电梯。本电梯调度算法基于**先来先服务（FCFS）调度算法**和**LOOK调度算法**，智能地考虑了电梯的当前状态和运行方向来优化任务的分配。以下是该算法详细介绍：
+
+#### 3.4.1 算法流程与逻辑
+
+* **初始化参数**
+  * 初始化为一个较大值（楼层数加一），用于存储计算出的最小距离。
+  * 初始化记录距离最小的电梯索引变量。
+* **遍历每部电梯**
+  * 跳过处于警报状态的电梯，因为这些电梯无法正常运行。
+* **计算到目标楼层的距离**
+  * 首先确定电梯的起始楼层。如果电梯正在向上或向下运行，会相应地调整其楼层（预测下一步的位置）。
+  * 根据电梯的运行方向，获取其任务队列（向上或向下的队列）。
+* **距离计算逻辑**
+  * 如果电梯当前没有任务，直接计算电梯当前楼层与目标楼层的绝对距离。
+  * 如果电梯的运行方向与任务方向一致，并且目标楼层在电梯的运行路径上，也计算当前楼层与目标楼层的绝对距离。
+  * 如果以上条件不成立，计算当前楼层到任务队列中最远楼层的距离，再加上最远楼层到目标楼层的距离。这种情况处理了电梯运行方向与任务方向不一致或目标楼层不在当前路径上的情况。
+* **选择最佳电梯**
+  * 如果计算出的距离小于当前记录的最小距离，则更新最小距离和目标电梯索引。
+* **返回结果**
+  * 函数最终返回距离最近的电梯索引，用于执行新的电梯任务。
+
+#### 3.4.2 算法特点与优势
+
+此电梯调度算法不仅提高了电梯系统的整体效率，还通过减少乘客等待时间和电梯空转时间，优化了电梯的运行效率，是一个高效且实用的电梯调度解决方案。
+
+* **效率与响应性**：通过选择最近的电梯来减少乘客的等待时间，提高系统的响应性和效率。
+* **智能决策**：算法考虑了电梯的当前运行状态和方向，更加智能地匹配任务，减少了不必要的电梯运行时间。
+* **动态调整**：算法能够动态地根据电梯的实时状态进行调整，使得电梯调度更加灵活和适应性强。
+
+### 3.5 用户交互设计
+
+## 4 项目实现
+
+### 4.1 常变量和全局变量
+
+#### 4.1.1 常变量
 
 在本电梯调度系统中，为了提高代码的可读性和可维护性，项目采用了常量的设计方式来管理系统中各种不变的参数。通过定义常变量，如电梯数量（ `ELEVATOR_NUM` ）、楼层数量（ `FLOOR_NUM` ）、以及刷新时间间隔等，使得这些值在整个项目中易于管理和修改。
 
@@ -186,30 +339,216 @@ QPushButton:disabled {{
 '''  # 按钮选中状态（禁用状态）样式
 ```
 
-#### 全局变量设计
+#### 4.1.2 全局变量
 
-### 枚举类设计
+全局变量是电梯调度系统中至关重要的组件，为电梯调度和多线程操作提供状态管理和数据共享。每个全局变量的作用如下：
 
-### 类设计
+* `mutex` ：互斥锁，由 `QMutex` 实现，用于在多线程操作中实现同步和互斥。它能够避免不同线程之间对全局数据的竞争或条件冲突，确保数据访问的一致性和安全性。
+* `elevator_up_queue` ：一个包含 `ELEVATOR_NUM` 个子列表的二维列表，每个子列表代表各台电梯的上行目标楼层队列。各个队列中的目标楼层将按照请求的顺序执行。这个列表确保上行的请求能够按照指定顺序分配并调度。
+* `elevator_down_queue` ：与 `elevator_up_queue` 类似，该变量包含每台电梯的下行目标楼层队列。下行请求在这里按照顺序排列，保证了电梯系统能正确地处理各楼层的下行请求。
+* `elevator_task_list` ：一个包含所有电梯任务的列表，保存了当前所有等待处理的外部楼层请求。这些任务由 `ElevatorTask` 类实例化，包含目标楼层、方向和状态等信息，是任务调度的重要基础数据。
+* `elevator_state` ：一个包含每台电梯当前状态的列表，初始状态为 `STATIONARY` （静止状态）。状态可以是上行（ `UPWARD` ）、下行（ `DOWNWARD` ）、报警（ `WARNING` ）或其他，反映了每台电梯的实时运行状态。
+* `elevator_current_floor` ：每台电梯当前楼层的位置列表，初始值为 `0` ，代表每台电梯的起始位置。在程序运行时，这个列表将动态更新电梯的当前位置，用于计算任务的距离和分配最优电梯。
+* `elevator_door_operating_progress` ：一个保存每台电梯当前门操作进度的列表，取值范围从 `0.0` （门完全关闭）到 `1.0` （门完全打开）。这确保了门的状态能够被准确追踪，从而让调度系统避免在门操作未完成时移动电梯。
+* `move_directions` ：一个保存每台电梯当前运行方向的列表，初始值为 `UPWARD` （上行方向）。电梯运行方向决定了调度算法如何分配任务和响应楼层请求。
 
-#### `MainWindow` 类（窗口类）设计
+这些全局变量为调度系统提供了状态追踪、任务分配和资源共享的基础框架，有助于确保多部电梯之间的协调运行，从而实现高效的楼层任务调度。
 
-#### `ElevatorTask` 类（电梯任务类）设计
+```python
+mutex = QMutex()  # 互斥锁（管理线程同步，避免数据竞争和条件竞争）
+elevator_up_queue = [[] for _ in range(ELEVATOR_NUM)]  # 每台电梯待处理的上行目标列表
+elevator_down_queue = [[] for _ in range(ELEVATOR_NUM)]  # 每台电梯待处理的下行目标列表
+elevator_task_list = []  # 电梯任务列表
+elevator_state = [ElevatorState.STATIONARY for _ in range(ELEVATOR_NUM)]  # 每台电梯的状态
+elevator_current_floor = [0 for _ in range(ELEVATOR_NUM)]  # 每台电梯的当前楼层
+elevator_door_operating_progress = [0.0 for _ in range(ELEVATOR_NUM)]  # 每台电梯的开关门进度
+move_directions = [ElevatorState.UPWARD for _ in range(ELEVATOR_NUM)]  # 每台电梯的运行方向
+```
 
-#### `ElevatorThread` 类（电梯进程类）设计
+### 4.2 类实现
 
-#### `ElevatorController` 类（电梯控制类）设计
+#### 4.2.1 `MainWindow` 类（窗口类）实现
 
-### 电梯调度算法设计
+`MainWindow` 类是电梯调度系统的核心窗口类，负责电梯调度界面的初始化和更新，同时处理电梯请求的交互操作。它的主要职责包括初始化组件、响应用户交互、更新界面状态以及在控制台输出信息。具体实现如下：
 
-### 用户交互设计
+* **构造函数 `__init__`**
+  * 初始化主窗口类并调用 `super()` 实现父类 `QMainWindow` 的构造。
+  * 实例化 UI 设计类 `ui_design.Ui_MainWindow()` 以加载界面。
+  * 创建用于显示电梯状态的组件列表，包括：LCD 显示器、状态列表、小按钮等。
+  * 设置定时器，通过指定的刷新时间间隔更新电梯调度状态，定时器触发的超时信号连接到 `update()` 方法。
+  * 最后通过 `show()` 方法显示主窗口。
 
-## 项目实现
+* **`init_ui_components()` 方法**
+  * 通过 `setupUi()` 方法设置并初始化用户界面。
+  * 将窗口标题设定为 `"Process Management - Elevator Scheduling | 进程管理 - 电梯调度"`。
+  * 逐个电梯实例化每个电梯的控制组件，并将它们与 `MainWindow` 类中的相应列表关联。
+  * 为按钮注册点击事件处理器，使用 `partial()` 为每个按钮提供特定的索引参数，方便点击事件处理函数识别是哪一台电梯或楼层。
 
-## 项目展示
+* **控制台输出 `console_output()` 方法**
+  * 将消息输出到控制台窗口，以 `[日期时间]`的格式记录每个事件发生的时间和信息。
 
-## 项目总结
+* **按钮点击事件处理**
+  * `elevator_open_door_button_clicked()` 和 `elevator_close_door_button_clicked()` 负责处理开门与关门按钮的点击事件，判断电梯的当前状态是否允许操作。
+  * `elevator_warning_button_clicked()` 处理电梯报警按钮，允许用户将报警状态激活或解除。
+  * `to_floor_elevator_button_clicked()` 处理电梯内的楼层按钮请求，添加楼层到电梯的上行或下行队列。
+  * `upward_or_downward_elevator_button_clicked()` 负责处理楼层外部的上下行按钮点击事件，生成新的电梯任务并添加到任务列表。
 
-## 文档更新日期
+* **状态更新**
+  * `update_elevator_state()` 方法根据给定的电梯和楼层索引更新状态列表项的外观。
+  * `update()` 方法作为定时器的超时信号处理器，负责更新各电梯的 LCD 显示器、运行状态、以及楼层上下行按钮的状态。它确保按钮样式和可用性反映当前电梯的状态。
+
+#### 4.2.2 `ElevatorTask` 类（电梯任务类）实现
+
+`ElevatorTask` 类代表电梯的一个调度任务，它记录了目标楼层、运行方向以及任务的当前状态。其实现细节如下：
+
+* **构造函数 `__init__`**
+  * 初始化时接收三个参数：目标楼层 `target_floor` 、电梯的运行方向 `move_direction` ，以及任务的状态 `task_state` （默认为 `ElevatorTaskState.PENDING` ）。
+  * 这些参数值分别存储在对象的属性 `target_floor` 、 `move_direction` 和 `task_state` 中。
+
+#### 4.2.3 `ElevatorThread` 类（电梯进程类）实现
+
+`ElevatorThread` 类是一个基于 `QThread` 的电梯线程类，实现了电梯运行过程中的核心逻辑。主要职责是处理每个独立电梯的任务，包括楼层移动、开关门和报警管理。以下是它的具体实现：
+
+* **构造函数 `__init__`**
+  * 初始化电梯的索引 `elevator_index` ，用于标识不同的电梯。
+  * 使用 `super().__init__()` 调用父类构造函数，确保线程正常初始化。
+
+* **方法 `floor_travel`**
+  * 负责电梯在不同楼层间移动，根据 `move_direction` 确定电梯向上或向下的方向，并更改电梯的状态。
+  * 通过一个时间循环模拟楼层间的移动时间，如果途中发生报警状态，会中断移动并调用 `warning_handler` 。
+  * 一旦到达目标楼层，将电梯当前楼层值更新，并切换电梯为静止状态。
+
+* **方法 `door_toggle`**
+  * 模拟电梯开关门操作，并更改电梯状态为门操作中。
+  * 在门的操作过程中，周期性检查报警状态，如果发生报警则中断操作并处理报警。
+  * 如果门完全打开或关闭，电梯状态被重置为静止状态。
+
+* **方法 `warning_handler`**
+  * 处理电梯的报警状态，将电梯状态设置为报警，并清空上下楼的任务队列。
+  * 将进行中的任务状态恢复为等待，确保故障排除后可以重新调度任务。
+
+* **方法 `run`**
+  * `run` 方法是线程的主要执行体，持续检测和执行电梯的任务。
+  * 根据当前移动方向，决定优先处理向上或向下的队列。
+  * 当电梯到达目标楼层时，会执行开关门操作并更新任务状态。
+  * 确保线程持续运行过程中不会阻塞，并可以随时切换方向或处理报警。
+
+#### 4.2.4 `ElevatorController` 类（电梯控制类）实现
+
+`ElevatorController` 类是一个基于 `QThread` 的电梯调度管理类，主要负责调度任务的分配和管理。以下是它的主要功能及实现细节：
+
+* **构造函数 `__init__`**
+  * 调用父类 `QThread` 的构造函数以初始化线程类。
+
+* **静态方法 `allocate_elevator`**
+  * 接受一个 `ElevatorTask` 实例作为参数，为任务分配最合适的电梯。
+  * 遍历每个电梯，跳过处于警报状态的电梯。
+  * 根据电梯当前的楼层状态（上下移动或静止）计算目标楼层与当前楼层的距离。
+  * 优先选择距离任务目标楼层最近且方向合适的电梯，将其索引返回给调用者。
+
+* **静态方法 `add_elevator_task`**
+  * 将新的电梯任务添加到相应电梯的任务队列中。
+  * `elevator_index` 指定哪个电梯执行任务， `elevator_task` 是任务本身， `descending` 标识电梯的运行方向。
+  * 维护两个不同的任务队列： `elevator_up_queue` （上行）和 `elevator_down_queue` （下行）。
+如果目标楼层未在队列中，按顺序插入目标楼层，同时将任务状态设置为“进行中”。
+
+* **方法 `run`**
+  * `run` 是线程的主要执行体，不断轮询 `elevator_task_list` ，查看是否有待处理的任务。
+  * 使用互斥锁确保对共享资源的安全访问。
+  * 对于每个任务，如果状态是“等待中”，通过 `allocate_elevator` 找到合适的电梯。
+  * 根据目标楼层和移动方向，将任务加入相应电梯的队列中。
+  * 清理已完成的任务，从任务列表中移除它们。
+
+### 4.3 电梯调度算法实现
+
+电梯调度算法在 `ElevatorController` 类中实现，首先初始化并通过方法 `run` 启动电梯控制线程，然后通过静态方法 `allocate_elevator` 接受一个 `ElevatorTask` 实例作为参数，为任务分配最合适的电梯。之后通过静态方法 `add_elevator_task` 将新的电梯任务添加到相应电梯的任务队列中。
+
+基于**先来先服务（FCFS）调度算法**和**LOOK调度算法**的电梯调度算法主要在静态方法 `allocate_elevator` 中实现，下面是此方法的具体实现细节：
+
+* **变量初始化**
+  * `min_distance` ：用于追踪当前找到的最小距离，初始化为比最大楼层数还要大的数值，以确保距离可以被正确更新。
+  * `target_elevator_index` ：初始化为 `-1` ，用于记录当前找到的目标电梯的索引。
+* **循环遍历电梯**
+  * 遍历所有电梯，通过 `elevator_index` 检查每个电梯的状态和当前任务队列：
+    * 跳过处于警报状态的电梯。
+    * 根据电梯状态（上行、下行、静止），确定电梯的当前位置 `origin_index` 。
+* **确定任务队列**
+  * 根据电梯的运行方向（ `move_directions` ），获取该电梯对应的目标楼层队列（上行或下行）。
+  * 如果**队列为空**，则直接计算目标楼层与当前楼层的距离。
+  * 如果**队列不为空**，进一步判断电梯的运行方向与任务方向是否一致，并确定目标楼层与队列中的楼层位置关系：
+    * **方向一致且位置合理**：直接计算 `origin_index` 与任务目标楼层的距离。
+    * **方向不同或位置不合理**：需绕过当前队列，计算经过最后一个目标楼层再到任务目标楼层的总距离。
+* **选择目标电梯**
+  * 如果计算得到的距离比 `min_distance` 更小，更新 `min_distance` 和 `target_elevator_index` 。
+* **返回结果**
+  * 返回找到的目标电梯索引。如果找不到合适的电梯，返回 `-1` 。
+
+```python
+@staticmethod
+def allocate_elevator(elevator_task):
+    """
+    为电梯任务分配电梯
+
+    :param elevator_task: 电梯任务
+    :type elevator_task: ElevatorTask
+    :return: 电梯索引
+    :rtype: int
+    """
+
+    # 变量初始化
+    min_distance = FLOOR_NUM + 1
+    target_elevator_index = -1
+
+    # 循环遍历电梯
+    for elevator_index in range(ELEVATOR_NUM):
+        if elevator_state[elevator_index] == ElevatorState.WARNING:
+            continue
+
+        target_indexes = []
+        origin_index = elevator_current_floor[elevator_index]
+        if elevator_state[elevator_index] == ElevatorState.UPWARD:
+            origin_index += 1
+        elif elevator_state[elevator_index] == ElevatorState.DOWNWARD:
+            origin_index -= 1
+
+        # 确定任务队列
+        if move_directions[elevator_index] == ElevatorState.UPWARD:
+            target_indexes = elevator_up_queue[elevator_index]
+        elif move_directions[elevator_index] == ElevatorState.DOWNWARD:
+            target_indexes = elevator_down_queue[elevator_index]
+
+        # 队列为空
+        if not target_indexes:
+            distance = abs(origin_index - elevator_task.target_floor)
+
+        # 队列不为空
+        else:
+            # 方向一致且位置合理
+            if move_directions[elevator_index] == elevator_task.move_direction and (
+                    (elevator_task.move_direction == ElevatorState.UPWARD
+                        and elevator_task.target_floor >= origin_index) or (
+                            elevator_task.move_direction == ElevatorState.DOWNWARD
+                            and elevator_task.target_floor <= origin_index)):
+                distance = abs(origin_index - elevator_task.target_floor)
+
+            # 方向不同或位置不合理
+            else:
+                distance = (abs(origin_index - target_indexes[-1])
+                            + abs(elevator_task.target_floor - target_indexes[-1]))
+
+        # 选择目标电梯
+        if distance < min_distance:
+            min_distance = distance
+            target_elevator_index = elevator_index
+
+    # 返回结果
+    return target_elevator_index
+```
+
+## 5 项目展示
+
+## 6 项目总结
+
+## 7 文档更新日期
 
 2024年5月7日

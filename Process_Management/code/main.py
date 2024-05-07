@@ -558,9 +558,12 @@ class ElevatorController(QThread):
         :return: 电梯索引
         :rtype: int
         """
+
+        # 变量初始化
         min_distance = FLOOR_NUM + 1
         target_elevator_index = -1
 
+        # 循环遍历电梯
         for elevator_index in range(ELEVATOR_NUM):
             if elevator_state[elevator_index] == ElevatorState.WARNING:
                 continue
@@ -572,26 +575,37 @@ class ElevatorController(QThread):
             elif elevator_state[elevator_index] == ElevatorState.DOWNWARD:
                 origin_index -= 1
 
+            # 确定任务队列
             if move_directions[elevator_index] == ElevatorState.UPWARD:
                 target_indexes = elevator_up_queue[elevator_index]
             elif move_directions[elevator_index] == ElevatorState.DOWNWARD:
                 target_indexes = elevator_down_queue[elevator_index]
 
+            # 队列为空
             if not target_indexes:
                 distance = abs(origin_index - elevator_task.target_floor)
-            elif move_directions[elevator_index] == elevator_task.move_direction and (
-                    (elevator_task.move_direction == ElevatorState.UPWARD
-                     and elevator_task.target_floor >= origin_index) or (
-                            elevator_task.move_direction == ElevatorState.DOWNWARD
-                            and elevator_task.target_floor <= origin_index)):
-                distance = abs(origin_index - elevator_task.target_floor)
-            else:
-                distance = abs(origin_index - target_indexes[-1]) + abs(elevator_task.target_floor - target_indexes[-1])
 
+            # 队列不为空
+            else:
+                # 方向一致且位置合理
+                if move_directions[elevator_index] == elevator_task.move_direction and (
+                        (elevator_task.move_direction == ElevatorState.UPWARD
+                         and elevator_task.target_floor >= origin_index) or (
+                                elevator_task.move_direction == ElevatorState.DOWNWARD
+                                and elevator_task.target_floor <= origin_index)):
+                    distance = abs(origin_index - elevator_task.target_floor)
+
+                # 方向不同或位置不合理
+                else:
+                    distance = (abs(origin_index - target_indexes[-1])
+                                + abs(elevator_task.target_floor - target_indexes[-1]))
+
+            # 选择目标电梯
             if distance < min_distance:
                 min_distance = distance
                 target_elevator_index = elevator_index
 
+        # 返回结果
         return target_elevator_index
 
     @staticmethod
