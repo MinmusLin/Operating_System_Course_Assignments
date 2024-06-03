@@ -13,11 +13,7 @@ public class Index
 
     public bool AddIndex(int idx)
     {
-        if (IsFull())
-        {
-            return false;
-        }
-
+        if (IsFull()) return false;
         IndexList.Add(idx);
         return true;
     }

@@ -11,10 +11,7 @@ public class Block
     public void Write(string data)
     {
         length = data.Length > Capacity ? Capacity : data.Length;
-        for (var i = 0; i < length; i++)
-        {
-            info[i] = data[i];
-        }
+        for (var i = 0; i < length; i++) info[i] = data[i];
     }
 
     public string Read()
@@ -29,11 +26,7 @@ public class Block
 
     public bool SetIndex(int idx)
     {
-        if (index.IsFull())
-        {
-            return false;
-        }
-
+        if (index.IsFull()) return false;
         index.AddIndex(idx);
         return true;
     }

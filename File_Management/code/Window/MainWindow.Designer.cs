@@ -265,7 +265,7 @@
             // 
             // FileNameHeader
             // 
-            FileNameHeader.Text = "文件名";
+            FileNameHeader.Text = "文件名 / 文件夹名";
             FileNameHeader.Width = 263;
             // 
             // ModifiedTimeHeader

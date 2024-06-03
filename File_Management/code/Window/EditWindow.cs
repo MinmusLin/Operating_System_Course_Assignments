@@ -5,154 +5,112 @@ namespace File_Management.Window;
 
 public partial class EditWindow : Form
 {
-    // 修改标识
-    bool changed;
-    // 该文件的FCB
-    private Metadata bf;
-    // 
-    private Node sf;
-    // 
-    private Dictionary<int, Pair> fileDict;
-    // 为了管理blocks
-    private Manager manager;
-    // 编辑前的大小
-    private string sizeBefore;
-    // ?
-    public DelegateMethod.delegateFunction CallBack;
+    private bool changedFlag;
+    private readonly Node node = null!;
+    private readonly Metadata fileMetadata = null!;
+    private readonly Dictionary<int, Pair> fileDictionary = null!;
+    private readonly Manager manager = null!;
+    private readonly string fileSize = null!;
+    public DelegateMethod.DelegateFunction CallBack = null!;
 
+    // 构造函数
     public EditWindow()
     {
         InitializeComponent();
     }
-    public EditWindow(Node sf, Metadata bf, Dictionary<int, Pair> fileDict, Manager manager, string sizeBefore)
+
+    // 构造函数
+    public EditWindow(Node node, Metadata fileMetadata, Dictionary<int, Pair> fileDictionary, Manager manager,
+        string fileSize)
     {
         InitializeComponent();
-        this.bf = bf;
-        this.sf = sf;
-        this.fileDict = fileDict;
+        this.node = node;
+        this.fileMetadata = fileMetadata;
+        this.fileDictionary = fileDictionary;
         this.manager = manager;
-        // 展示磁盘对应内容
-        ShowText();
-        // 窗口标题显示文件名
-        base.Text = bf.FileName;
-        // 没修改
-        changed = false;
-        // 编辑前的大小
-        this.sizeBefore = sizeBefore;
+        ReadText();
+        base.Text = fileMetadata.FileName;
+        changedFlag = false;
+        this.fileSize = fileSize;
     }
-    private void ShowText()
+
+    // 读文本文件
+    private void ReadText()
     {
-        // 得到该文件的所有索引
-        List<int> indexList = bf.FileTable.GetDataIndexList();
-        string text = "";
-        foreach (int idx in indexList)
+        var indexList = fileMetadata.FileTable.GetDataIndexList();
+        var text = "";
+        foreach (var index in indexList)
         {
-            // 数据块
-            if (manager.GetBlock(idx).GetIndex().Count == 0)
+            if (manager.GetBlock(index).GetIndex().Count == 0)
             {
-                text += manager.GetBlockInfo(idx);
+                text += manager.GetBlockInfo(index);
             }
             else
             {
-                // 读索引块中索引对应数据块
-                foreach (int index in manager.GetBlock(idx).GetIndex())
-                {
-                    text += manager.GetBlockInfo(index);
-                }
+                text = manager.GetBlock(index).GetIndex()
+                    .Aggregate(text, (current, idx) => current + manager.GetBlockInfo(idx));
             }
         }
-        // 设置到文本
+
         Text.Text = text;
     }
-    private void WriteData()
-    { 
-        string text = Text.Text;
-        // 计算文件大小
-        string ext = "B";
-        long size = text.Length * 4;
-        // 单位升级
-        /*
-        if (size > 1024)
-        {
-            size /= 1024;
-            ext = "KB";
-        }
-        if (size > 1024)
-        {
-            size /= 1024;
-            ext = "MB";
-        }
-        */
-        bf.FileSize = size.ToString() + ext;
-        // 释放之前的磁盘块
-        FreeBlock();
-        // 重新写数据 返回新的索引表
-        bf.FileTable = manager.Write(text);
-    }
-    private void UpdateFile(string sizeBefore, string sizeAfter)
-    {
-        // 大小差值
-        int delta = int.Parse(Regex.Match(sizeAfter, @"\d+").Value)
-                    - int.Parse(Regex.Match(sizeBefore, @"\d+").Value);
-        // 不用改变
-        //if (delta == 0)
-        //{
-        //    return;
-        //}
-        Node curSf = sf.FatherNode;
-        // 找到根节点停止
-        while (fileDict.ContainsKey(curSf.FileId))
-        {
-            Metadata curBf = fileDict[curSf.FileId].Metadata;
-            curBf.ModifiedTime = DateTime.Now;
-            int newSize = int.Parse(Regex.Match(curBf.FileSize, @"\d+").Value) + delta;
-            curBf.FileSize = newSize.ToString() + 
-                             (Regex.Match(curBf.FileSize, @"\D+").Value == "" ? "B" : Regex.Match(curBf.FileSize, @"\D+").Value);
 
-            curSf = curSf.FatherNode;
+    // 写文本文件
+    private void WriteText()
+    {
+        var text = Text.Text;
+        fileMetadata.FileSize = text.Length * 4 + "B";
+        manager.Remove(fileMetadata.FileTable.GetDataIndexList());
+        fileMetadata.FileTable = manager.Write(text);
+    }
+
+    // 更新文本文件大小
+    private void UpdateSize(string sizeBefore, string sizeAfter)
+    {
+        var delta = int.Parse(Regex1().Match(sizeAfter).Value) - int.Parse(Regex2().Match(sizeBefore).Value);
+        var fatherNode = node.FatherNode;
+        while (fileDictionary.ContainsKey(fatherNode.FileId))
+        {
+            var currentNode = fileDictionary[fatherNode.FileId].Metadata;
+            currentNode.ModifiedTime = DateTime.Now;
+            var newSize = int.Parse(Regex3().Match(currentNode.FileSize).Value) + delta;
+            currentNode.FileSize = newSize + (Regex4().Match(currentNode.FileSize).Value == ""
+                ? "B"
+                : Regex5().Match(currentNode.FileSize).Value);
+            fatherNode = fatherNode.FatherNode;
         }
     }
 
-    private void MyCallBack()
+    // 文本内容更改响应函数
+    private void TextChange(object sender, EventArgs e)
     {
-        if (CallBack != null)
-        {
-            CallBack();
-        }
-    }
-    private void FreeBlock()
-    {
-        // 得到索引表中所有索引
-        List<int> indexList = bf.FileTable.GetDataIndexList();
-        // 删除索引表以及索引数据
-        manager.Remove(indexList);
+        if (changedFlag) return;
+        base.Text += @"*";
+        changedFlag = true;
     }
 
-    private void TxtInputWindow_FormClosing(object sender, FormClosingEventArgs e)
+    // 文本窗口关闭响应函数
+    private void EditWindowClose(object sender, FormClosingEventArgs e)
     {
-        // 弹出消息窗口确认是否保存
-        if (changed && MessageBox.Show("Do you want to save changes", "Tip", MessageBoxButtons.YesNo)
-            == DialogResult.Yes)
-        {
-            bf.ModifiedTime = DateTime.Now;
-            WriteData();
-            UpdateFile(sizeBefore, bf.FileSize);
-            MyCallBack();
-        }
+        if (!changedFlag || MessageBox.Show(@"是否保存文本文件？", @"提示", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
+        fileMetadata.ModifiedTime = DateTime.Now;
+        WriteText();
+        UpdateSize(fileSize, fileMetadata.FileSize);
+        CallBack();
     }
-    // 改变后加个星星 才要保存
-    private void textBox_TextChanged(object sender, EventArgs e)
-    {
-        // 没有修改过才加星星
-        if (!changed)
-        {
-            base.Text += "*";
-            changed = true;
-        }
-            
-    }
-}
-public class DelegateMethod
-{
-    public delegate void delegateFunction();
+
+    [GeneratedRegex(@"\d+")]
+    private static partial Regex Regex1();
+
+    [GeneratedRegex(@"\d+")]
+    private static partial Regex Regex2();
+
+    [GeneratedRegex(@"\d+")]
+    private static partial Regex Regex3();
+
+    [GeneratedRegex(@"\D+")]
+    private static partial Regex Regex4();
+
+    [GeneratedRegex(@"\D+")]
+    private static partial Regex Regex5();
 }

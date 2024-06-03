@@ -99,10 +99,7 @@ public partial class MainWindow : Form
         var newNode = new Node(fileName, fileType);
         currentNode.AddChildNode(newNode);
         Metadata fatherMetadata = null!;
-        if (pairDictionary.TryGetValue(currentNode.FileId, out var value))
-        {
-            fatherMetadata = value.Metadata;
-        }
+        if (pairDictionary.TryGetValue(currentNode.FileId, out var value)) fatherMetadata = value.Metadata;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         var fatherPath = fatherMetadata == null ? "根目录" : fatherMetadata.FilePath;
@@ -124,7 +121,6 @@ public partial class MainWindow : Form
                 currentNode = node;
                 PathText.Text = @"> " + metadata.FilePath;
                 BackwardButton.Enabled = true;
-                ForwardButton.Enabled = false;
                 nodeStack.Clear();
                 UpdateFileListView();
                 break;
@@ -144,7 +140,7 @@ public partial class MainWindow : Form
     {
         if (FileListView.SelectedItems.Count == 0)
         {
-            MessageBox.Show(@"请选中一个文件或文件夹！", @"提示");
+            MessageBox.Show(@"请选中一个文件或文件夹", @"提示");
             return;
         }
 
@@ -167,6 +163,7 @@ public partial class MainWindow : Form
     {
         if (FileListView.SelectedItems.Count != 1)
         {
+            MessageBox.Show(@"请选中一个文件或文件夹", @"提示");
             return;
         }
 
@@ -176,7 +173,7 @@ public partial class MainWindow : Form
         var node = pairDictionary[fileId].Node;
         var metadata = pairDictionary[fileId].Metadata;
         var renameBox = new RenameWindow(node, metadata, currentNode);
-        renameBox.CallBack = UpdateFileView;
+        renameBox.UpdateCallback = UpdateFileView;
         renameBox.Show();
     }
 
@@ -186,31 +183,17 @@ public partial class MainWindow : Form
         var binaryFormatter = new BinaryFormatter();
         using (var fileDictStream = new FileStream(Path.Combine(currentPath, "FileDictionary.dat"), FileMode.Open,
                    FileAccess.Read, FileShare.Read))
-        {
             pairDictionary = (binaryFormatter.Deserialize(fileDictStream) as Dictionary<int, Pair>)!;
-        }
-
         using (var fileRootNodeStream = new FileStream(Path.Combine(currentPath, "FileRootNode.dat"), FileMode.Open,
                    FileAccess.Read, FileShare.Read))
-        {
             rootNode = (binaryFormatter.Deserialize(fileRootNodeStream) as Node)!;
-        }
-
         using (var fileManagerStream = new FileStream(Path.Combine(currentPath, "FileManager.dat"), FileMode.Open,
                    FileAccess.Read, FileShare.Read))
-        {
             manager = (binaryFormatter.Deserialize(fileManagerStream) as Manager)!;
-        }
-
         var content = "";
         using (var streamReader = new StreamReader(Path.Combine(currentPath, "FileCount.dat")))
-        {
             while (streamReader.ReadLine() is { } line)
-            {
                 content += line;
-            }
-        }
-
         Node.counter = int.Parse(content);
         InitializeFileView();
         MessageBox.Show(@"从本地加载虚拟磁盘文件", @"提示");
@@ -222,29 +205,15 @@ public partial class MainWindow : Form
         var binaryFormatter = new BinaryFormatter();
         using (var fileDictionaryStream =
                new FileStream(Path.Combine(currentPath, "FileDictionary.dat"), FileMode.Create))
-        {
             binaryFormatter.Serialize(fileDictionaryStream, pairDictionary);
-        }
-
         using (var fileRootNodeStream = new FileStream(Path.Combine(currentPath, "FileRootNode.dat"), FileMode.Create))
-        {
             binaryFormatter.Serialize(fileRootNodeStream, rootNode);
-        }
-
         using (var fileManagerStream = new FileStream(Path.Combine(currentPath, "FileManager.dat"), FileMode.Create))
-        {
             binaryFormatter.Serialize(fileManagerStream, manager);
-        }
-
         using (var fileCountStream =
                new FileStream(Path.Combine(currentPath, "FileCount.dat"), FileMode.Create, FileAccess.Write))
-        {
-            using (var streamWriter = new StreamWriter(fileCountStream))
-            {
-                streamWriter.WriteLine(Node.counter.ToString());
-            }
-        }
-
+        using (var streamWriter = new StreamWriter(fileCountStream))
+            streamWriter.WriteLine(Node.counter.ToString());
         MessageBox.Show(@"保存虚拟磁盘文件至本地：" + currentPath, @"提示");
     }
 
@@ -277,7 +246,7 @@ public partial class MainWindow : Form
     {
         if (FileListView.SelectedItems.Count != 1)
         {
-            MessageBox.Show(@"请选中一个文件或文件夹！", @"提示");
+            MessageBox.Show(@"请选中一个文件或文件夹", @"提示");
             return;
         }
 
@@ -301,20 +270,16 @@ public partial class MainWindow : Form
     // 从本地加载虚拟磁盘文件操作鼠标单击响应函数
     private void LoadOperationClick(object sender, EventArgs e)
     {
-        var fileList = new List<string>(Directory.GetFiles(currentPath, "*.*").Where(s => s.EndsWith(".dat")));
+        var fileList = Directory.GetFiles(currentPath, "*.dat").Select(Path.GetFileName).ToList();
         string[] targetFile = ["FileDictionary.dat", "FileRootNode.dat", "FileManager.dat", "FileCount.dat"];
         if (targetFile.Any(file => !fileList.Contains(file)))
         {
-            MessageBox.Show(@"从本地加载虚拟磁盘文件失败！", @"提示");
+            MessageBox.Show(@"从本地加载虚拟磁盘文件失败", @"提示");
             return;
         }
 
         LoadFromDisk();
-        foreach (var child in rootNode.ChildNode)
-        {
-            child.FatherNode = rootNode;
-        }
-
+        foreach (var child in rootNode.ChildNode) child.FatherNode = rootNode;
         UpdateFileView();
     }
 
@@ -334,18 +299,13 @@ public partial class MainWindow : Form
     // 路径返回按钮鼠标单击响应函数
     private void BackwardButtonClick(object sender, EventArgs e)
     {
-        if (currentNode.FileId == rootNode.FileId)
-        {
-            return;
-        }
-
+        if (currentNode.FileId == rootNode.FileId) return;
         ForwardButton.Enabled = true;
         nodeStack.Push(currentNode);
         currentNode = currentNode.FatherNode;
         if (currentNode.FileId == rootNode.FileId)
         {
             PathText.Text = @"> 根目录\";
-            BackwardButton.Enabled = false;
         }
         else
         {
@@ -358,17 +318,8 @@ public partial class MainWindow : Form
     // 路径前进按钮鼠标单击响应函数
     private void ForwardButtonClick(object sender, EventArgs e)
     {
-        if (nodeStack.Count == 0)
-        {
-            return;
-        }
-
+        if (nodeStack.Count == 0) return;
         currentNode = nodeStack.Pop();
-        if (nodeStack.Count == 0)
-        {
-            ForwardButton.Enabled = false;
-        }
-
         PathText.Text = @"> " + pairDictionary[currentNode.FileId].Metadata.FilePath;
         BackwardButton.Enabled = true;
         UpdateFileListView();
@@ -377,11 +328,7 @@ public partial class MainWindow : Form
     // 文件列表视图鼠标双击响应函数
     private void FileListViewDoubleClick(object sender, EventArgs e)
     {
-        if (FileListView.SelectedItems.Count != 1)
-        {
-            return;
-        }
-
+        if (FileListView.SelectedItems.Count != 1) return;
         var item = FileListView.SelectedItems[0];
         var fileId = GetFileId(item);
         OpenOperation(fileId);
@@ -391,20 +338,14 @@ public partial class MainWindow : Form
     private void MainWindowClose(object sender, FormClosingEventArgs e)
     {
         if (changedFlag && MessageBox.Show(@"是否保存虚拟磁盘文件至本地？", @"提示", MessageBoxButtons.YesNo) == DialogResult.Yes)
-        {
             SaveToDisk();
-        }
     }
 
     // 获取文件 ID
     private int GetFileId(ListViewItem item)
     {
-        foreach (var kvp in listViewItemDirectory.Where(kvp => kvp.Value.Text == item.Text))
-        {
-            return kvp.Key;
-        }
-
-        MessageBox.Show(@"未找到该文件或文件夹！", @"提示");
+        foreach (var kvp in listViewItemDirectory.Where(kvp => kvp.Value.Text == item.Text)) return kvp.Key;
+        MessageBox.Show(@"未找到该文件或文件夹", @"提示");
         return -1;
     }
 
@@ -430,16 +371,8 @@ public partial class MainWindow : Form
 
         for (var i = 0; i < currentNode.ChildNode.Count + 1; i++)
         {
-            if (sameNameFile.Contains(i))
-            {
-                continue;
-            }
-
-            if (i != 0)
-            {
-                fileName += "(" + i + ")";
-            }
-
+            if (sameNameFile.Contains(i)) continue;
+            if (i != 0) fileName += "(" + i + ")";
             break;
         }
 

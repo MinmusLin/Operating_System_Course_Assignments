@@ -41,7 +41,7 @@
             Text.Size = new Size(762, 539);
             Text.TabIndex = 0;
             Text.Text = "";
-            Text.TextChanged += textBox_TextChanged;
+            Text.TextChanged += TextChange;
             // 
             // EditWindow
             // 
@@ -58,7 +58,7 @@
             MinimizeBox = false;
             MinimumSize = new Size(800, 600);
             Name = "EditWindow";
-            FormClosing += TxtInputWindow_FormClosing;
+            FormClosing += EditWindowClose;
             ResumeLayout(false);
         }
 

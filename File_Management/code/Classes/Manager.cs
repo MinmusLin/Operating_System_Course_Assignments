@@ -16,10 +16,7 @@ public class Manager
         blocks = new Block[Capacity];
         bitMap = new bool[Capacity];
         bitIndex = 0;
-        for (var i = 0; i < Capacity; i++)
-        {
-            bitMap[i] = true;
-        }
+        for (var i = 0; i < Capacity; i++) bitMap[i] = true;
     }
 
     public Block GetBlock(int idx)
@@ -46,10 +43,7 @@ public class Manager
             }
 
             tempIdx = (tempIdx + 1) % Capacity;
-            if (tempIdx == bitIndex)
-            {
-                break;
-            }
+            if (tempIdx == bitIndex) break;
         }
 
         return -1;
@@ -58,18 +52,12 @@ public class Manager
     public void Remove(int idx)
     {
         bitMap[idx] = true;
-        foreach (var index in blocks[idx].GetIndex())
-        {
-            bitMap[index] = true;
-        }
+        foreach (var index in blocks[idx].GetIndex()) bitMap[index] = true;
     }
 
     public void Remove(List<int> indexList)
     {
-        foreach (int index in indexList)
-        {
-            Remove(index);
-        }
+        foreach (int index in indexList) Remove(index);
     }
 
     public Table Write(string data)
@@ -121,11 +109,7 @@ public class Manager
                 break;
             }
 
-            if (flag)
-            {
-                return table;
-            }
-
+            if (flag) return table;
             var indexEmptyIndex = AllocateBlock();
             blocks[indexEmptyIndex].SetIndex(emptyIndex);
             table.AddIndexIndex(indexEmptyIndex);

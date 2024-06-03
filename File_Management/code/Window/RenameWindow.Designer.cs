@@ -42,7 +42,6 @@
             InputText.Name = "InputText";
             InputText.Size = new Size(210, 24);
             InputText.TabIndex = 0;
-            InputText.TextChanged += textBox1_TextChanged;
             // 
             // SaveButton
             // 
@@ -53,7 +52,7 @@
             SaveButton.TabIndex = 1;
             SaveButton.Text = "保存(&S)";
             SaveButton.UseVisualStyleBackColor = true;
-            SaveButton.Click += btn_Yes_Click;
+            SaveButton.Click += SaveButtonClick;
             // 
             // CancelButton
             // 
@@ -64,7 +63,7 @@
             CancelButton.TabIndex = 2;
             CancelButton.Text = "取消(&C)";
             CancelButton.UseVisualStyleBackColor = true;
-            CancelButton.Click += btn_No_Click;
+            CancelButton.Click += CancelButtonClick;
             // 
             // RenameWindow
             // 
@@ -85,8 +84,6 @@
             Name = "RenameWindow";
             ShowInTaskbar = false;
             Text = "重命名";
-            FormClosing += RenameBox_FormClosing;
-            KeyDown += RenameBox_KeyDown;
             ResumeLayout(false);
             PerformLayout();
         }
