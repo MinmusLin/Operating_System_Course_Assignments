@@ -85,7 +85,6 @@
             FileMenuItem.ShortcutKeys = Keys.Alt | Keys.F;
             FileMenuItem.Size = new Size(66, 24);
             FileMenuItem.Text = "文件(&F)";
-            FileMenuItem.Click += fileToolStripMenuItem_Click;
             // 
             // LoadDropdownItem
             // 
@@ -94,7 +93,7 @@
             LoadDropdownItem.ShortcutKeys = Keys.Control | Keys.L;
             LoadDropdownItem.Size = new Size(206, 30);
             LoadDropdownItem.Text = "从本地加载";
-            LoadDropdownItem.Click += loadToolStripMenuItem_Click;
+            LoadDropdownItem.Click += LoadOperationClick;
             // 
             // SaveDropdownItem
             // 
@@ -102,8 +101,8 @@
             SaveDropdownItem.Name = "SaveDropdownItem";
             SaveDropdownItem.ShortcutKeys = Keys.Control | Keys.S;
             SaveDropdownItem.Size = new Size(206, 30);
-            SaveDropdownItem.Text = "保存到本地";
-            SaveDropdownItem.Click += saveToolStripMenuItem_Click;
+            SaveDropdownItem.Text = "保存至本地";
+            SaveDropdownItem.Click += SaveOperationClick;
             // 
             // ResetDropdownItem
             // 
@@ -112,7 +111,7 @@
             ResetDropdownItem.ShortcutKeys = Keys.Control | Keys.R;
             ResetDropdownItem.Size = new Size(206, 30);
             ResetDropdownItem.Text = "格式化";
-            ResetDropdownItem.Click += formatToolStripMenuItem_Click;
+            ResetDropdownItem.Click += ResetOperationClick;
             // 
             // OperationMenuItem
             // 
@@ -137,7 +136,7 @@
             TextDropdownItem.ShortcutKeys = Keys.Control | Keys.T;
             TextDropdownItem.Size = new Size(192, 30);
             TextDropdownItem.Text = "文本文件";
-            TextDropdownItem.Click += txtToolStripMenuItem_Click;
+            TextDropdownItem.Click += CreateTextOperationClick;
             // 
             // FolderDropdownItem
             // 
@@ -146,7 +145,7 @@
             FolderDropdownItem.ShortcutKeys = Keys.Control | Keys.F;
             FolderDropdownItem.Size = new Size(192, 30);
             FolderDropdownItem.Text = "文件夹";
-            FolderDropdownItem.Click += folderToolStripMenuItem_Click;
+            FolderDropdownItem.Click += CreateFolderOperationClick;
             // 
             // OpenDropdownItem
             // 
@@ -155,7 +154,7 @@
             OpenDropdownItem.ShortcutKeys = Keys.Control | Keys.O;
             OpenDropdownItem.Size = new Size(188, 30);
             OpenDropdownItem.Text = "打开";
-            OpenDropdownItem.Click += openToolStripMenuItem_Click;
+            OpenDropdownItem.Click += OpenOperationClick;
             // 
             // DeleteDropdownItem
             // 
@@ -164,7 +163,7 @@
             DeleteDropdownItem.ShortcutKeys = Keys.Control | Keys.D;
             DeleteDropdownItem.Size = new Size(188, 30);
             DeleteDropdownItem.Text = "删除";
-            DeleteDropdownItem.Click += deleteToolStripMenuItem_Click;
+            DeleteDropdownItem.Click += DeleteOperationClick;
             // 
             // RenameDropdownItem
             // 
@@ -173,7 +172,7 @@
             RenameDropdownItem.ShortcutKeys = Keys.Control | Keys.N;
             RenameDropdownItem.Size = new Size(188, 30);
             RenameDropdownItem.Text = "重命名";
-            RenameDropdownItem.Click += renameToolStripMenuItem1_Click;
+            RenameDropdownItem.Click += RenameOperationClick;
             // 
             // PathText
             // 
@@ -188,9 +187,8 @@
             PathText.Size = new Size(838, 28);
             PathText.TabIndex = 3;
             PathText.TabStop = false;
-            PathText.Text = "> root\\";
+            PathText.Text = "> 根目录\\";
             PathText.WordWrap = false;
-            PathText.TextChanged += cur_path_text_TextChanged;
             // 
             // BackwardButton
             // 
@@ -206,7 +204,7 @@
             BackwardButton.TabIndex = 1;
             BackwardButton.TabStop = false;
             BackwardButton.UseVisualStyleBackColor = false;
-            BackwardButton.Click += btn_return_Click;
+            BackwardButton.Click += BackwardButtonClick;
             // 
             // ForwardButton
             // 
@@ -223,7 +221,7 @@
             ForwardButton.TabStop = false;
             ForwardButton.Text = "->";
             ForwardButton.UseVisualStyleBackColor = false;
-            ForwardButton.Click += btn_forward_Click;
+            ForwardButton.Click += ForwardButtonClick;
             // 
             // FileTreeView
             // 
@@ -236,7 +234,6 @@
             FileTreeView.Size = new Size(250, 555);
             FileTreeView.TabIndex = 4;
             FileTreeView.TabStop = false;
-            FileTreeView.AfterSelect += FileTreeView_AfterSelect;
             // 
             // IconList
             // 
@@ -264,8 +261,7 @@
             FileListView.TabStop = false;
             FileListView.UseCompatibleStateImageBehavior = false;
             FileListView.View = View.Details;
-            FileListView.SelectedIndexChanged += FileListView_SelectedIndexChanged;
-            FileListView.DoubleClick += listView_DoubleClick;
+            FileListView.DoubleClick += FileListViewDoubleClick;
             // 
             // FileNameHeader
             // 
@@ -310,7 +306,7 @@
             TextContextMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.T;
             TextContextMenuItem.Size = new Size(233, 30);
             TextContextMenuItem.Text = "文本文件";
-            TextContextMenuItem.Click += txtToolStripMenuItem_Click;
+            TextContextMenuItem.Click += CreateTextOperationClick;
             // 
             // FolderContextMenuItem
             // 
@@ -319,7 +315,7 @@
             FolderContextMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.F;
             FolderContextMenuItem.Size = new Size(233, 30);
             FolderContextMenuItem.Text = "文件夹";
-            FolderContextMenuItem.Click += folderToolStripMenuItem_Click;
+            FolderContextMenuItem.Click += CreateFolderOperationClick;
             // 
             // OpenContextMenuItem
             // 
@@ -328,7 +324,7 @@
             OpenContextMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.O;
             OpenContextMenuItem.Size = new Size(222, 30);
             OpenContextMenuItem.Text = "打开";
-            OpenContextMenuItem.Click += openToolStripMenuItem_Click;
+            OpenContextMenuItem.Click += OpenOperationClick;
             // 
             // DeleteContextMenuItem
             // 
@@ -337,7 +333,7 @@
             DeleteContextMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.D;
             DeleteContextMenuItem.Size = new Size(222, 30);
             DeleteContextMenuItem.Text = "删除";
-            DeleteContextMenuItem.Click += deleteToolStripMenuItem_Click;
+            DeleteContextMenuItem.Click += DeleteOperationClick;
             // 
             // RenameContextMenuItem
             // 
@@ -346,7 +342,7 @@
             RenameContextMenuItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.N;
             RenameContextMenuItem.Size = new Size(222, 30);
             RenameContextMenuItem.Text = "重命名";
-            RenameContextMenuItem.Click += renameToolStripMenuItem1_Click;
+            RenameContextMenuItem.Click += RenameOperationClick;
             // 
             // MainWindow
             // 
@@ -369,8 +365,7 @@
             MinimumSize = new Size(940, 668);
             Name = "MainWindow";
             Text = "File Management | 文件管理 - 2250758 林继申";
-            FormClosing += MainWindow_FormClosing;
-            Load += MainWindow_Load;
+            FormClosing += MainWindowClose;
             Menu.ResumeLayout(false);
             Menu.PerformLayout();
             ContextMenu.ResumeLayout(false);

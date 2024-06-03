@@ -57,7 +57,6 @@ public class Manager
 
     public void Remove(int idx)
     {
-        System.Diagnostics.Debug.Assert(idx is >= 0 and < Capacity);
         bitMap[idx] = true;
         foreach (var index in blocks[idx].GetIndex())
         {
@@ -80,7 +79,6 @@ public class Manager
         while (data.Length > Block.Capacity)
         {
             emptyIndex = AllocateBlock();
-            System.Diagnostics.Debug.Assert(emptyIndex is >= 0 and < Capacity);
             blocks[emptyIndex].Write(data[..Block.Capacity]);
             if (!table.IsDataListFull())
             {
@@ -100,7 +98,6 @@ public class Manager
                 {
                     var indexEmptyIndex = AllocateBlock();
                     blocks[indexEmptyIndex].SetIndex(emptyIndex);
-                    System.Diagnostics.Debug.Assert(!table.IsIndexListFull());
                     table.AddIndexIndex(indexEmptyIndex);
                 }
             }
@@ -109,7 +106,6 @@ public class Manager
         }
 
         emptyIndex = AllocateBlock();
-        System.Diagnostics.Debug.Assert(emptyIndex is >= 0 and < Capacity);
         blocks[emptyIndex].Write(data);
         if (!table.IsDataListFull())
         {
@@ -132,7 +128,6 @@ public class Manager
 
             var indexEmptyIndex = AllocateBlock();
             blocks[indexEmptyIndex].SetIndex(emptyIndex);
-            System.Diagnostics.Debug.Assert(!table.IsIndexListFull());
             table.AddIndexIndex(indexEmptyIndex);
         }
 

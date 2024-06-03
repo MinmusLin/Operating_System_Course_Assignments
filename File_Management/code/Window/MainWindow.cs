@@ -1,5 +1,6 @@
 ﻿#pragma warning disable SYSLIB0011
 
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Runtime.Serialization.Formatters.Binary;
 using File_Management.Classes;
@@ -8,641 +9,452 @@ namespace File_Management.Window;
 
 public partial class MainWindow : Form
 {
-    // 修改标识
-    bool changed;
+    private bool changedFlag;
+    private Node rootNode = null!;
+    private Node currentNode = null!;
+    private Manager manager = null!;
+    private Dictionary<int, Pair> pairDictionary = null!;
+    private readonly string currentPath = Directory.GetCurrentDirectory();
+    private Dictionary<int, ListViewItem> listViewItemDirectory = null!;
+    private TreeNode rootTreeNode = null!;
+    private Stack<Node> nodeStack = null!;
 
-    // 当前symfcb
-    public Node CurNode;
-
-    // 根symfcb
-    public Node RootNode;
-
-    // 字典fileId -> fcb的映射
-    public Dictionary<int, Pair> fileDict;
-
-    // 管理
-    public Manager manager;
-
-    // 当前路径
-    public string curPath = Directory.GetCurrentDirectory();
-
-    // 文件显示窗口
-    private Dictionary<int, ListViewItem> listTable;
-
-    // 文件树根结点
-    private TreeNode rootNode;
-
-    // 保存前进方向
-    private Stack<Node> fileStack;
-
+    // 构造函数
     public MainWindow()
     {
         InitializeComponent();
-        RootNode = new Node("ROOT", "folder");
-        CurNode = RootNode;
-        manager = new Manager();
-        fileDict = new Dictionary<int, Pair>();
-        fileStack = new Stack<Node>();
-        changed = false;
-
-        //Metadata rootBasicFCB = new Metadata(RootNode, "ROOT");
-        //CreateMap(RootNode, rootBasicFCB);
-
-        InitializeView();
+        ResetOperation();
     }
 
-    // 初始化界面
-    public void InitializeView()
-    {
-        //初始化列表
-        InitializeListView();
-        //初始化目录树
-        InitializeTreeView();
-        // 得到根
-        CurNode = RootNode;
-        PathText.Text = "> ROOT\\";
-    }
-
-    // 初始化树形界面
-    public void InitializeListView()
+    // 初始化文件视图
+    private void InitializeFileView()
     {
         FileListView.Items.Clear();
-    }
-
-    // 初始化列表
-    public void InitializeTreeView()
-    {
         FileTreeView.Nodes.Clear();
-        rootNode = new TreeNode("ROOT");
-        FileTreeView.Nodes.Add(rootNode);
+        rootTreeNode = new TreeNode("根目录");
+        FileTreeView.Nodes.Add(rootTreeNode);
         FileTreeView.ExpandAll();
+        currentNode = rootNode;
+        PathText.Text = @"> 根目录\";
     }
 
-    // 更新界面
-    public void UpdateView()
+    // 初始化文件树视图
+    private static void InitializeCreateFileTreeView(TreeNode treeNode, Node node)
     {
-        UpdateTreeView();
-        UpdateListView();
-    }
-
-    // 更新树形界面
-    public void UpdateTreeView()
-    {
-        FileTreeView.Nodes.Clear();
-        rootNode = new TreeNode("ROOT");
-        CreateTreeView(rootNode, RootNode);
-        FileTreeView.Nodes.Add(rootNode);
-        FileTreeView.ExpandAll();
-    }
-
-    // 递归函数生成树形界面
-    public void CreateTreeView(TreeNode rootNode, Node curFCB)
-    {
-        foreach (Node child in curFCB.ChildNode)
+        foreach (var child in node.ChildNode)
         {
-            TreeNode childNode = new TreeNode(child.FileName);
-            // 如果是txt设置第二个图标 默认是第一个
-            if (child.FileType == "txt")
+            var childNode = new TreeNode(child.FileName);
+            if (child.FileType == "文本文件")
             {
                 childNode.ImageIndex = 1;
                 childNode.SelectedImageIndex = 1;
             }
 
-            CreateTreeView(childNode, child);
-            rootNode.Nodes.Add(childNode);
+            InitializeCreateFileTreeView(childNode, child);
+            treeNode.Nodes.Add(childNode);
         }
     }
 
-    // 更新列表界面
-    public void UpdateListView()
+    // 更新文件视图
+    private void UpdateFileView()
     {
-        listTable = new Dictionary<int, ListViewItem>();
+        UpdateFileTreeView();
+        UpdateFileListView();
+    }
+
+    // 更新文件树视图
+    private void UpdateFileTreeView()
+    {
+        FileTreeView.Nodes.Clear();
+        rootTreeNode = new TreeNode("根目录");
+        InitializeCreateFileTreeView(rootTreeNode, rootNode);
+        FileTreeView.Nodes.Add(rootTreeNode);
+        FileTreeView.ExpandAll();
+    }
+
+    // 更新文件列表视图
+    private void UpdateFileListView()
+    {
+        listViewItemDirectory = new Dictionary<int, ListViewItem>();
         FileListView.Items.Clear();
-        foreach (Node child in CurNode.ChildNode)
+        foreach (var child in currentNode.ChildNode)
         {
-            Metadata file = fileDict[child.FileId].Metadata;
-            ListViewItem item = new ListViewItem(new string[]
-            {
+            var file = pairDictionary[child.FileId].Metadata;
+            var item = new ListViewItem([
                 file.FileName,
-                file.ModifiedTime.ToString(),
+                file.ModifiedTime.ToString(CultureInfo.CurrentCulture),
                 file.FileType,
                 file.FileSize
-            }, file.FileType == "folder" ? 0 : 1);
-
-            listTable[file.FileId] = item;
-            // 加入列表视图
+            ], file.FileType == "文件夹" ? 0 : 1);
+            listViewItemDirectory[file.FileId] = item;
             FileListView.Items.Add(item);
         }
     }
 
-    // 构建文件号到Pair的映射
-    public void CreateMap(Node item, Metadata file)
+    // 新建操作函数
+    private void CreateOperation(string fileType, string ext = "")
     {
-        fileDict[item.FileId] = new Pair(item, file);
+        changedFlag = true;
+        var fileName = CheckFileName("新建" + fileType, ext);
+        var newNode = new Node(fileName, fileType);
+        currentNode.AddChildNode(newNode);
+        Metadata fatherMetadata = null!;
+        if (pairDictionary.TryGetValue(currentNode.FileId, out var value))
+        {
+            fatherMetadata = value.Metadata;
+        }
+
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        var fatherPath = fatherMetadata == null ? "根目录" : fatherMetadata.FilePath;
+        var @new = new Metadata(newNode, fatherPath);
+        pairDictionary[newNode.FileId] = new Pair(newNode, @new);
+        UpdateFileView();
     }
 
-    // 检查是否重名
-    private string CheckSameName(string fileName, string ext = "")
+    // 打开操作函数
+    private void OpenOperation(int fileId)
     {
-        // 列表记录同名的共多少个
-        List<int> sameNameFile = new List<int>();
-        // 在当前目录下找是否有重名
-        foreach (Node child in CurNode.ChildNode)
+        var node = pairDictionary[fileId].Node;
+        var metadata = pairDictionary[fileId].Metadata;
+        var fileSize = metadata.FileSize;
+        switch (node.FileType)
         {
-            // 文件类型不同
-            if (!((child.FileType == "folder" && ext == "") || (child.FileType == ext)))
+            case "文件夹":
             {
-                continue;
+                currentNode = node;
+                PathText.Text = @"> " + metadata.FilePath;
+                BackwardButton.Enabled = true;
+                ForwardButton.Enabled = false;
+                nodeStack.Clear();
+                UpdateFileListView();
+                break;
             }
-
-            // 去掉最后一个圆括号及其之后的内容，[^\(]* 表示任意不是左括号的字符可以出现 0 次或多次
-            string childFileName = Regex.Replace(child.FileName, @"\(\d+\)[^(\(\d+\))]*$", "");
-            // 去掉后缀
-            childFileName = Regex.Replace(childFileName, String.Format(@"\.{0}", ext), "");
-
-            if (childFileName == fileName)
+            case "文本文件":
             {
-                // 获得当前最后一个圆括号，匹配.之前的数字和圆括号
-                Match match1;
-                if (child.FileType == "folder")
-                    match1 = Regex.Match(child.FileName, @"\(\d+\)$", RegexOptions.RightToLeft);
-                else
-                    match1 = Regex.Match(child.FileName, @"\(\d+\)\.", RegexOptions.RightToLeft);
-                // 没有匹配的第0个
-                if (!match1.Success)
-                {
-                    sameNameFile.Add(0);
-                    continue;
-                }
-
-                // 获取括号中的数字
-                Match match2 = Regex.Match(match1.Value, @"\d+");
-                // 数字转换为下标
-                int idx = int.Parse(match2.Value);
-                // 标记为true
-                sameNameFile.Add(idx);
+                var txtInputWindow = new EditWindow(node, metadata, pairDictionary, manager, fileSize);
+                txtInputWindow.CallBack = UpdateFileView;
+                txtInputWindow.Show();
+                break;
             }
         }
-
-        // 出现重名
-        for (int i = 0; i < CurNode.ChildNode.Count + 1; ++i)
-        {
-            if (sameNameFile.Contains(i))
-                continue;
-            // 找第一个缺的数字，i == 0就不用增加
-            if (i != 0)
-                fileName += "(" + i.ToString() + ")";
-            break;
-        }
-
-        return fileName + ((ext == "") ? "" : ("." + ext));
     }
 
-    // 由ListViewItem得到fileId
-    public int GetFileId(ListViewItem item)
-    {
-        foreach (var kv in listTable)
-        {
-            if (kv.Value.Text == item.Text)
-            {
-                return kv.Key;
-            }
-        }
-
-        // 找不到
-        MessageBox.Show("FILE NOT FOUND");
-        return -1;
-    }
-
-    // 新建文件
-    private void txtToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        changed = true;
-        string fileName = CheckSameName("NEW TEXT", "txt");
-        string fatherPath;
-        // 添加到当前目录下的孩子中
-        Node newNode = new Node(fileName, "txt");
-        CurNode.AddChildNode(newNode);
-
-        Metadata father = null;
-        if (fileDict.ContainsKey(CurNode.FileId))
-        {
-            father = fileDict[CurNode.FileId].Metadata;
-        }
-
-        fatherPath = father == null ? "ROOT" : father.FilePath;
-        Metadata @new = new Metadata(newNode, fatherPath);
-        CreateMap(newNode, @new);
-        UpdateView();
-    }
-
-    // 新建文件夹
-    private void folderToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        changed = true;
-        string fileName = CheckSameName("NEW FOLDER");
-        string fatherPath;
-        // 添加到当前目录下的孩子中
-        Node newNode = new Node(fileName, "folder");
-        CurNode.AddChildNode(newNode);
-
-        Metadata father = null;
-        if (fileDict.ContainsKey(CurNode.FileId))
-        {
-            father = fileDict[CurNode.FileId].Metadata;
-        }
-
-        fatherPath = father == null ? "ROOT" : father.FilePath;
-        Metadata @new = new Metadata(newNode, fatherPath);
-        CreateMap(newNode, @new);
-        UpdateView();
-    }
-
-    // 格式化
-    private void formatToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        fileDict = new Dictionary<int, Pair>();
-        RootNode = new Node("ROOT", "folder");
-        CurNode = RootNode;
-        manager = new Manager();
-        fileStack = new Stack<Node>();
-        changed = false;
-        //Metadata rootBasicFCB = new Metadata(RootNode, "ROOT");
-        //CreateMap(RootNode, rootBasicFCB);
-
-        InitializeView();
-    }
-
-    // 删除文件点击响应
-    private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+    // 删除操作函数
+    private void DeleteOperation()
     {
         if (FileListView.SelectedItems.Count == 0)
         {
-            MessageBox.Show("PLEASE SELECT A FILE OR  FOLDER");
+            MessageBox.Show(@"请选中一个文件或文件夹！", @"提示");
             return;
         }
 
-        changed = true;
-        // 找到每个item对应的fileId，从而找到对应数据块、索引块的索引
+        changedFlag = true;
         foreach (ListViewItem item in FileListView.SelectedItems)
         {
-            int fileId = GetFileId(item);
-            Metadata bf = fileDict[fileId].Metadata;
-            List<int> idxList = bf.FileTable.GetDataIndexList();
-            // 取消占用标记
-            manager.Remove(idxList);
-            // 删除树形结构中的记录
-            CurNode.RemoveChildNode(fileDict[fileId].Node);
-            // 映射表中移除
-            fileDict.Remove(fileId);
+            var fileId = GetFileId(item);
+            var metadata = pairDictionary[fileId].Metadata;
+            var indexList = metadata.FileTable.GetDataIndexList();
+            manager.Remove(indexList);
+            currentNode.RemoveChildNode(pairDictionary[fileId].Node);
+            pairDictionary.Remove(fileId);
         }
 
-        // 更新视图
-        UpdateView();
+        UpdateFileView();
     }
 
-    // 打开文件点击响应
-    private void openToolStripMenuItem_Click(object sender, EventArgs e)
+    // 重命名操作函数
+    private void RenameOperation()
     {
-        if (FileListView.SelectedItems.Count != 1)
-        {
-            MessageBox.Show("PLEASE SELECT A FILE OR  FOLDER");
-            return;
-        }
-
-        ListViewItem curItem = FileListView.SelectedItems[0];
-        int fileId = GetFileId(curItem);
-        OpenFile(fileId);
-    }
-
-    // 打开文件的操作
-    private void OpenFile(int fileId)
-    {
-        Node sf = fileDict[fileId].Node;
-        Metadata bf = fileDict[fileId].Metadata;
-        string sizeBefore = bf.FileSize;
-        // 根据文件类型判断操作
-        if (sf.FileType == "folder")
-        {
-            // 变换当前视图sym结构根节点
-            CurNode = sf;
-            PathText.Text = "> " + bf.FilePath;
-            // 打开文件夹后可以返回
-            BackwardButton.Enabled = true;
-            // 打开文件夹后不能前进
-            ForwardButton.Enabled = false;
-            // 打开新的文件把旧的栈中清除
-            fileStack.Clear();
-            // 变换列表视图
-            UpdateListView();
-        }
-        else if (sf.FileType == "txt")
-        {
-            EditWindow txtInputWindow = new EditWindow(sf, bf, fileDict, manager, sizeBefore);
-            txtInputWindow.CallBack = UpdateView;
-            txtInputWindow.Show();
-        }
-    }
-
-    // 双击列表视图
-    private void listView_DoubleClick(object sender, EventArgs e)
-    {
-        // 选中的不是一个就不响应
         if (FileListView.SelectedItems.Count != 1)
         {
             return;
         }
 
-        ListViewItem item = FileListView.SelectedItems[0];
-        // 获得文件Id
-        int fileId = GetFileId(item);
-        // 打开文件操作
-        OpenFile(fileId);
-    }
-
-    // 重命名
-    private void renameToolStripMenuItem1_Click(object sender, EventArgs e)
-    {
-        // 选中不止一个无效
-        if (FileListView.SelectedItems.Count != 1)
-        {
-            return;
-        }
-
-        changed = true;
-        ListViewItem curItem = FileListView.SelectedItems[0];
-        int fileId = GetFileId(curItem);
-        Node sf = fileDict[fileId].Node;
-        Metadata bf = fileDict[fileId].Metadata;
-        RenameWindow renameBox = new RenameWindow(sf, bf, CurNode);
-        renameBox.CallBack = UpdateView;
+        changedFlag = true;
+        var item = FileListView.SelectedItems[0];
+        var fileId = GetFileId(item);
+        var node = pairDictionary[fileId].Node;
+        var metadata = pairDictionary[fileId].Metadata;
+        var renameBox = new RenameWindow(node, metadata, currentNode);
+        renameBox.CallBack = UpdateFileView;
         renameBox.Show();
     }
 
-    // 返回上一级按钮
-    private void btn_return_Click(object sender, EventArgs e)
+    // 从本地加载虚拟磁盘文件
+    private void LoadFromDisk()
     {
-        // 是根目录就不返回了
-        if (CurNode.FileId == RootNode.FileId)
+        var binaryFormatter = new BinaryFormatter();
+        using (var fileDictStream = new FileStream(Path.Combine(currentPath, "FileDictionary.dat"), FileMode.Open,
+                   FileAccess.Read, FileShare.Read))
+        {
+            pairDictionary = (binaryFormatter.Deserialize(fileDictStream) as Dictionary<int, Pair>)!;
+        }
+
+        using (var fileRootNodeStream = new FileStream(Path.Combine(currentPath, "FileRootNode.dat"), FileMode.Open,
+                   FileAccess.Read, FileShare.Read))
+        {
+            rootNode = (binaryFormatter.Deserialize(fileRootNodeStream) as Node)!;
+        }
+
+        using (var fileManagerStream = new FileStream(Path.Combine(currentPath, "FileManager.dat"), FileMode.Open,
+                   FileAccess.Read, FileShare.Read))
+        {
+            manager = (binaryFormatter.Deserialize(fileManagerStream) as Manager)!;
+        }
+
+        var content = "";
+        using (var streamReader = new StreamReader(Path.Combine(currentPath, "FileCount.dat")))
+        {
+            while (streamReader.ReadLine() is { } line)
+            {
+                content += line;
+            }
+        }
+
+        Node.counter = int.Parse(content);
+        InitializeFileView();
+        MessageBox.Show(@"从本地加载虚拟磁盘文件", @"提示");
+    }
+
+    // 保存虚拟磁盘文件至本地
+    private void SaveToDisk()
+    {
+        var binaryFormatter = new BinaryFormatter();
+        using (var fileDictionaryStream =
+               new FileStream(Path.Combine(currentPath, "FileDictionary.dat"), FileMode.Create))
+        {
+            binaryFormatter.Serialize(fileDictionaryStream, pairDictionary);
+        }
+
+        using (var fileRootNodeStream = new FileStream(Path.Combine(currentPath, "FileRootNode.dat"), FileMode.Create))
+        {
+            binaryFormatter.Serialize(fileRootNodeStream, rootNode);
+        }
+
+        using (var fileManagerStream = new FileStream(Path.Combine(currentPath, "FileManager.dat"), FileMode.Create))
+        {
+            binaryFormatter.Serialize(fileManagerStream, manager);
+        }
+
+        using (var fileCountStream =
+               new FileStream(Path.Combine(currentPath, "FileCount.dat"), FileMode.Create, FileAccess.Write))
+        {
+            using (var streamWriter = new StreamWriter(fileCountStream))
+            {
+                streamWriter.WriteLine(Node.counter.ToString());
+            }
+        }
+
+        MessageBox.Show(@"保存虚拟磁盘文件至本地：" + currentPath, @"提示");
+    }
+
+    // 格式化操作函数
+    private void ResetOperation()
+    {
+        changedFlag = false;
+        rootNode = new Node("根目录", "文件夹");
+        currentNode = rootNode;
+        manager = new Manager();
+        pairDictionary = new Dictionary<int, Pair>();
+        nodeStack = new Stack<Node>();
+        InitializeFileView();
+    }
+
+    // 新建文本文件操作鼠标单击响应函数
+    private void CreateTextOperationClick(object sender, EventArgs e)
+    {
+        CreateOperation("文本文件", "txt");
+    }
+
+    // 新建文件夹操作鼠标单击响应函数
+    private void CreateFolderOperationClick(object sender, EventArgs e)
+    {
+        CreateOperation("文件夹");
+    }
+
+    // 打开操作鼠标单击响应函数
+    private void OpenOperationClick(object sender, EventArgs e)
+    {
+        if (FileListView.SelectedItems.Count != 1)
+        {
+            MessageBox.Show(@"请选中一个文件或文件夹！", @"提示");
+            return;
+        }
+
+        var item = FileListView.SelectedItems[0];
+        var fileId = GetFileId(item);
+        OpenOperation(fileId);
+    }
+
+    // 删除操作鼠标单击响应函数
+    private void DeleteOperationClick(object sender, EventArgs e)
+    {
+        DeleteOperation();
+    }
+
+    // 重命名操作鼠标单击响应函数
+    private void RenameOperationClick(object sender, EventArgs e)
+    {
+        RenameOperation();
+    }
+
+    // 从本地加载虚拟磁盘文件操作鼠标单击响应函数
+    private void LoadOperationClick(object sender, EventArgs e)
+    {
+        var fileList = new List<string>(Directory.GetFiles(currentPath, "*.*").Where(s => s.EndsWith(".dat")));
+        string[] targetFile = ["FileDictionary.dat", "FileRootNode.dat", "FileManager.dat", "FileCount.dat"];
+        if (targetFile.Any(file => !fileList.Contains(file)))
+        {
+            MessageBox.Show(@"从本地加载虚拟磁盘文件失败！", @"提示");
+            return;
+        }
+
+        LoadFromDisk();
+        foreach (var child in rootNode.ChildNode)
+        {
+            child.FatherNode = rootNode;
+        }
+
+        UpdateFileView();
+    }
+
+    // 保存虚拟磁盘文件至本地操作鼠标单击响应函数
+    private void SaveOperationClick(object sender, EventArgs e)
+    {
+        SaveToDisk();
+        changedFlag = false;
+    }
+
+    // 格式化操作鼠标单击响应函数
+    private void ResetOperationClick(object sender, EventArgs e)
+    {
+        ResetOperation();
+    }
+
+    // 路径返回按钮鼠标单击响应函数
+    private void BackwardButtonClick(object sender, EventArgs e)
+    {
+        if (currentNode.FileId == rootNode.FileId)
         {
             return;
         }
 
-        // 能返回就一定能前进
         ForwardButton.Enabled = true;
-        // 加入前进栈
-        fileStack.Push(CurNode);
-        // 返回上一级
-        CurNode = CurNode.FatherNode;
-        if (CurNode.FileId == RootNode.FileId)
+        nodeStack.Push(currentNode);
+        currentNode = currentNode.FatherNode;
+        if (currentNode.FileId == rootNode.FileId)
         {
-            PathText.Text = "> ROOT\\";
-            // 根目录下不能返回
+            PathText.Text = @"> 根目录\";
             BackwardButton.Enabled = false;
         }
         else
         {
-            PathText.Text = "> " + fileDict[CurNode.FileId].Metadata.FilePath;
+            PathText.Text = @"> " + pairDictionary[currentNode.FileId].Metadata.FilePath;
         }
 
-        // 更新列表视图
-        UpdateListView();
+        UpdateFileListView();
     }
 
-    // 前进按钮
-    private void btn_forward_Click(object sender, EventArgs e)
+    // 路径前进按钮鼠标单击响应函数
+    private void ForwardButtonClick(object sender, EventArgs e)
     {
-        if (fileStack.Count == 0)
+        if (nodeStack.Count == 0)
         {
             return;
         }
 
-        CurNode = fileStack.Pop();
-        if (fileStack.Count == 0)
+        currentNode = nodeStack.Pop();
+        if (nodeStack.Count == 0)
         {
             ForwardButton.Enabled = false;
         }
 
-        PathText.Text = "> " + fileDict[CurNode.FileId].Metadata.FilePath;
-        // 能前进必然也能后退
+        PathText.Text = @"> " + pairDictionary[currentNode.FileId].Metadata.FilePath;
         BackwardButton.Enabled = true;
-        UpdateListView();
+        UpdateFileListView();
     }
 
-    // 加载已有文件
-    private void loadToolStripMenuItem_Click(object sender, EventArgs e)
+    // 文件列表视图鼠标双击响应函数
+    private void FileListViewDoubleClick(object sender, EventArgs e)
     {
-        // 先查看当前目录下有无需要的文件 转换为文件名
-        var jsonFileList = new List<string>(Directory.GetFiles(curPath, "*.*")
-            .Where(s => s.EndsWith(".dat") || s.EndsWith(".txt")).Select(Path.GetFileName));
-        //var jsonFileList = Directory.GetFiles(curPath, "*.json").ToList();
-        string[] targetFile = new string[] { "fileDict.dat", "RootNode.dat", "manager.dat", "fileCount.txt" };
-        foreach (string file in targetFile)
+        if (FileListView.SelectedItems.Count != 1)
         {
-            // 不包含任何一个目标函数
-            if (!jsonFileList.Contains(file))
+            return;
+        }
+
+        var item = FileListView.SelectedItems[0];
+        var fileId = GetFileId(item);
+        OpenOperation(fileId);
+    }
+
+    // 主窗口关闭响应函数
+    private void MainWindowClose(object sender, FormClosingEventArgs e)
+    {
+        if (changedFlag && MessageBox.Show(@"是否保存虚拟磁盘文件至本地？", @"提示", MessageBoxButtons.YesNo) == DialogResult.Yes)
+        {
+            SaveToDisk();
+        }
+    }
+
+    // 获取文件 ID
+    private int GetFileId(ListViewItem item)
+    {
+        foreach (var kvp in listViewItemDirectory.Where(kvp => kvp.Value.Text == item.Text))
+        {
+            return kvp.Key;
+        }
+
+        MessageBox.Show(@"未找到该文件或文件夹！", @"提示");
+        return -1;
+    }
+
+    // 检查文件名
+    private string CheckFileName(string fileName, string ext = "")
+    {
+        var sameNameFile = new List<int>();
+        var name = fileName;
+        foreach (var match in from child in currentNode.ChildNode
+                 where (child.FileType == "文件夹" && ext == "") || (child.FileType == "文本文件" && ext == "txt")
+                 let childFileName = Regex.Replace(child.FileName, $"{Regex4()}|\\.{ext}$", "")
+                 where childFileName == name
+                 select child.FileType == "文件夹" ? Regex2().Match(child.FileName) : Regex3().Match(child.FileName))
+        {
+            if (!match.Success)
             {
-                // 弹出窗口提示并退出
-                MessageBox.Show("TARGET FILE NOT FOUND!", "WARNING");
-                return;
+                sameNameFile.Add(0);
+                continue;
             }
+
+            sameNameFile.Add(int.Parse(Regex1().Match(match.Value).Value));
         }
 
-        // 加载文件
-        LoadData();
-        // 检查循环引用
-        CheckFather();
-        // 更新界面
-        UpdateView();
-    }
-
-    // 保存当前文件
-    private void saveToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-        SaveData();
-        changed = false;
-    }
-
-    // 保存数据
-    private void SaveData()
-    {
-        // 缩进保存
-        //var options = new JsonSerializerOptions { WriteIndented = true };
-        // 处理循环引用
-        /*
-        var settings = new JsonSerializerSettings
+        for (var i = 0; i < currentNode.ChildNode.Count + 1; i++)
         {
-            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-            Formatting = Formatting.Indented
-        };
-
-        // 转换为json格式
-        //string jsonFileDict = JsonSerializer.Serialize(fileDict, options);
-        string jsonFileDict = JsonConvert.SerializeObject(fileDict, settings);
-        // 创建一个新文件，若已存在会覆盖
-        File.WriteAllText(Path.Combine(curPath, "fileDict.json"), jsonFileDict);
-        // 转换为json格式
-        //string jsonRootSymFCB = JsonConvert.SerializeObject(RootNode, settings);
-        // 创建一个新文件，若已存在会覆盖
-        //File.WriteAllText(Path.Combine(curPath, "RootNode.json"), jsonRootSymFCB);
-        // 转换为json格式
-        string jsonManager = JsonConvert.SerializeObject(manager, settings);
-        // 创建一个新文件，若已存在会覆盖
-        File.WriteAllText(Path.Combine(curPath, "manager.json"), jsonManager);
-        */
-        BinaryFormatter bf = new BinaryFormatter();
-
-        // var fileDictStream = new FileStream(Path.Combine(curPath, "fileDict.dat"), FileMode.Create);
-        // bf.Serialize(fileDictStream, fileDict);
-        // fileDictStream.Close();
-        using (var fileDictStream = new FileStream(Path.Combine(curPath, "fileDict.dat"), FileMode.Create))
-        {
-            bf.Serialize(fileDictStream, fileDict);
-        }
-
-        // var rootSymFCBStream = new FileStream(Path.Combine(curPath, "RootNode.dat"), FileMode.Create);
-        // bf.Serialize(rootSymFCBStream, RootNode);
-        // rootSymFCBStream.Close();
-        using (var rootSymFCBStream = new FileStream(Path.Combine(curPath, "RootNode.dat"), FileMode.Create))
-        {
-            bf.Serialize(rootSymFCBStream, RootNode);
-        }
-
-        // var managerStream = new FileStream(Path.Combine(curPath, "manager.dat"), FileMode.Create);
-        // bf.Serialize(managerStream, manager);
-        // managerStream.Close();
-        using (var managerStream = new FileStream(Path.Combine(curPath, "manager.dat"), FileMode.Create))
-        {
-            bf.Serialize(managerStream, manager);
-        }
-
-        // int类型直接存入txt文件
-        // var fileCountStream = new FileStream(Path.Combine(curPath, "fileCount.txt"), FileMode.Create, FileAccess.Write);
-        // var sw = new StreamWriter(fileCountStream);
-        // sw.WriteLine(Node.counter.ToString());
-        // sw.Close();
-        // fileCountStream.Close();
-        using (var fileCountStream =
-               new FileStream(Path.Combine(curPath, "fileCount.txt"), FileMode.Create, FileAccess.Write))
-        {
-            using (var sw = new StreamWriter(fileCountStream))
+            if (sameNameFile.Contains(i))
             {
-                sw.WriteLine(Node.counter.ToString());
+                continue;
             }
-        }
 
-        // 提示消息
-        MessageBox.Show("Save Successfully\n" + curPath, "Tip");
-    }
-
-    private void LoadData()
-    {
-        /*
-        // 处理循环引用
-        var settings = new JsonSerializerSettings
-        {
-            PreserveReferencesHandling = PreserveReferencesHandling.Objects
-        };
-        // 从文件中读取 反序列化
-        string jsonFileDict = File.ReadAllText(Path.Combine(curPath, "fileDict.json"));
-        // fileDict = JsonSerializer.Deserialize<Dictionary<int, Pair>>(jsonFileDict);
-        JsonConvert.PopulateObject(jsonFileDict, fileDict, settings);
-        // fileDict = JsonConvert.DeserializeObject<Dictionary<int, Pair>>(jsonFileDict);
-        // 从文件中读取 反序列化
-        // string jsonRootSymFCB = File.ReadAllText(Path.Combine(curPath, "RootNode.json"));
-        // JsonConvert.PopulateObject(jsonRootSymFCB, RootNode, settings);
-        // RootNode = JsonConvert.DeserializeObject<Node>(jsonRootSymFCB);
-        // 从文件中读取 反序列化
-        string jsonManager = File.ReadAllText(Path.Combine(curPath, "manager.json"));
-        JsonConvert.PopulateObject(jsonManager, manager, settings);
-        // manager = JsonConvert.DeserializeObject<Manager>(jsonManager);
-        */
-
-        BinaryFormatter bf = new BinaryFormatter();
-
-        // var fileDictStream = new FileStream(Path.Combine(curPath, "fileDict.dat"), FileMode.Open, FileAccess.Read, FileShare.Read);
-        // fileDict = bf.Deserialize(fileDictStream) as Dictionary<int, Pair>;
-        // fileDictStream.Close();
-        using (var fileDictStream = new FileStream(Path.Combine(curPath, "fileDict.dat"), FileMode.Open,
-                   FileAccess.Read, FileShare.Read))
-        {
-            fileDict = bf.Deserialize(fileDictStream) as Dictionary<int, Pair>;
-        }
-
-        // var rootSymFCBStream = new FileStream(Path.Combine(curPath, "RootNode.dat"), FileMode.Open, FileAccess.Read, FileShare.Read);
-        // RootNode = bf.Deserialize(rootSymFCBStream) as Node;
-        // rootSymFCBStream.Close();
-        using (var rootSymFCBStream = new FileStream(Path.Combine(curPath, "RootNode.dat"), FileMode.Open,
-                   FileAccess.Read, FileShare.Read))
-        {
-            RootNode = bf.Deserialize(rootSymFCBStream) as Node;
-        }
-
-        // var managerStream = new FileStream(Path.Combine(curPath, "manager.dat"), FileMode.Open, FileAccess.Read, FileShare.Read);
-        // manager = bf.Deserialize(managerStream) as Manager;
-        // managerStream.Close();
-        using (var managerStream = new FileStream(Path.Combine(curPath, "manager.dat"), FileMode.Open,
-                   FileAccess.Read, FileShare.Read))
-        {
-            manager = bf.Deserialize(managerStream) as Manager;
-        }
-
-        // var fileCountStream = new FileStream(Path.Combine(curPath, "fileCount.dat"), FileMode.Open, FileAccess.Read, FileShare.Read);
-        // Node.counter = int.Parse(bf.Deserialize(fileCountStream) as string);
-        // fileCountStream.Close();
-        string res = "";
-        using (StreamReader sr = new StreamReader(Path.Combine(curPath, "fileCount.txt")))
-        {
-            string line;
-            while ((line = sr.ReadLine()) != null)
+            if (i != 0)
             {
-                res += line;
+                fileName += "(" + i + ")";
             }
+
+            break;
         }
 
-        Node.counter = int.Parse(res);
-
-        // 初始化
-        InitializeView();
-        MessageBox.Show("Load successfully", "Tip");
+        return $"{fileName}{(ext == "" ? "" : ("." + ext))}";
     }
 
-    private void CheckFather()
-    {
-        foreach (Node child in RootNode.ChildNode)
-        {
-            child.FatherNode = RootNode;
-        }
-    }
+    [GeneratedRegex(@"\d+")]
+    private static partial Regex Regex1();
 
-    private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
-    {
-        // 关闭窗口时弹出消息窗口是否保存
-        if (changed && MessageBox.Show("Do you want save the data?", "Tip", MessageBoxButtons.YesNo) ==
-            DialogResult.Yes)
-        {
-            SaveData();
-        }
-    }
+    [GeneratedRegex(@"\(\d+\)$", RegexOptions.RightToLeft)]
+    private static partial Regex Regex2();
 
+    [GeneratedRegex(@"\(\d+\)\.", RegexOptions.RightToLeft)]
+    private static partial Regex Regex3();
 
-    private void MainWindow_Load(object sender, EventArgs e)
-    {
-    }
-
-    private void fileToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-    }
-
-    private void cur_path_text_TextChanged(object sender, EventArgs e)
-    {
-    }
-
-    private void FileListView_SelectedIndexChanged(object sender, EventArgs e)
-    {
-    }
-
-    private void FileTreeView_AfterSelect(object sender, TreeViewEventArgs e)
-    {
-    }
+    [GeneratedRegex(@"\(\d+\)[^(\(\d+\))]*$")]
+    private static partial Regex Regex4();
 }

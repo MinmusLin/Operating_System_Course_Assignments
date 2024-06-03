@@ -17,7 +17,7 @@ public class Node
     public Node()
     {
         FileId = counter++;
-        FileType = "folder";
+        FileType = "文件夹";
         FatherNode = null!;
         ChildNode = new List<Node>();
     }
