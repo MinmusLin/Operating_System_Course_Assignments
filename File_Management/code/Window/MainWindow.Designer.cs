@@ -60,6 +60,7 @@
             OpenContextMenuItem = new ToolStripMenuItem();
             DeleteContextMenuItem = new ToolStripMenuItem();
             RenameContextMenuItem = new ToolStripMenuItem();
+            DropdownItemSeparator = new ToolStripSeparator();
             Menu.SuspendLayout();
             ContextMenu.SuspendLayout();
             SuspendLayout();
@@ -76,10 +77,11 @@
             Menu.Size = new Size(924, 26);
             Menu.TabIndex = 0;
             Menu.Text = "menuStrip1";
+            Menu.ItemClicked += Menu_ItemClicked;
             // 
             // FileMenuItem
             // 
-            FileMenuItem.DropDownItems.AddRange(new ToolStripItem[] { LoadDropdownItem, SaveDropdownItem, ResetDropdownItem });
+            FileMenuItem.DropDownItems.AddRange(new ToolStripItem[] { LoadDropdownItem, SaveDropdownItem, DropdownItemSeparator, ResetDropdownItem });
             FileMenuItem.ImageAlign = ContentAlignment.BottomCenter;
             FileMenuItem.Name = "FileMenuItem";
             FileMenuItem.ShortcutKeys = Keys.Alt | Keys.F;
@@ -344,6 +346,11 @@
             RenameContextMenuItem.Text = "重命名";
             RenameContextMenuItem.Click += RenameOperationClick;
             // 
+            // DropdownItemSeparator
+            // 
+            DropdownItemSeparator.Name = "DropdownItemSeparator";
+            DropdownItemSeparator.Size = new Size(203, 6);
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
@@ -364,7 +371,7 @@
             MaximumSize = new Size(940, 668);
             MinimumSize = new Size(940, 668);
             Name = "MainWindow";
-            Text = "File Management | 文件管理 - 2250758 林继申";
+            Text = "File Management | 文件管理 - Virtual File System Manager (VFSM) | 虚拟文件系统管理器 - 2250758 林继申";
             FormClosing += MainWindowClose;
             Menu.ResumeLayout(false);
             Menu.PerformLayout();
@@ -404,6 +411,7 @@
         private System.Windows.Forms.ToolStripMenuItem FolderContextMenuItem;
         private System.Windows.Forms.ToolStripMenuItem TextContextMenuItem;
         private ToolStripMenuItem ResetDropdownItem;
+        private ToolStripSeparator DropdownItemSeparator;
     }
 }
 

@@ -117,21 +117,21 @@ public partial class MainWindow : Form
         switch (node.FileType)
         {
             case "文件夹":
-            {
-                currentNode = node;
-                PathText.Text = @"> " + metadata.FilePath;
-                BackwardButton.Enabled = true;
-                nodeStack.Clear();
-                UpdateFileListView();
-                break;
-            }
+                {
+                    currentNode = node;
+                    PathText.Text = @"> " + metadata.FilePath;
+                    BackwardButton.Enabled = true;
+                    nodeStack.Clear();
+                    UpdateFileListView();
+                    break;
+                }
             case "文本文件":
-            {
-                var txtInputWindow = new EditWindow(node, metadata, pairDictionary, manager, fileSize);
-                txtInputWindow.CallBack = UpdateFileView;
-                txtInputWindow.Show();
-                break;
-            }
+                {
+                    var txtInputWindow = new EditWindow(node, metadata, pairDictionary, manager, fileSize);
+                    txtInputWindow.CallBack = UpdateFileView;
+                    txtInputWindow.Show();
+                    break;
+                }
         }
     }
 
@@ -355,10 +355,10 @@ public partial class MainWindow : Form
         var sameNameFile = new List<int>();
         var name = fileName;
         foreach (var match in from child in currentNode.ChildNode
-                 where (child.FileType == "文件夹" && ext == "") || (child.FileType == "文本文件" && ext == "txt")
-                 let childFileName = Regex.Replace(child.FileName, $"{Regex4()}|\\.{ext}$", "")
-                 where childFileName == name
-                 select child.FileType == "文件夹" ? Regex2().Match(child.FileName) : Regex3().Match(child.FileName))
+                              where (child.FileType == "文件夹" && ext == "") || (child.FileType == "文本文件" && ext == "txt")
+                              let childFileName = Regex.Replace(child.FileName, $"{Regex4()}|\\.{ext}$", "")
+                              where childFileName == name
+                              select child.FileType == "文件夹" ? Regex2().Match(child.FileName) : Regex3().Match(child.FileName))
         {
             if (!match.Success)
             {
