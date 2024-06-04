@@ -104,6 +104,12 @@
 
 ### 1.4 项目运行
 
+#### 1.4.1 直接运行
+
+* 下载 [Release]() 部署 `Memory_Management` 在服务器上运行
+
+#### 1.4.2 编译运行
+
 * 搭建 Vite + Vue 开发环境
 
 * 使用 JetBrains WebStorm 打开前端应用程序，启动终端
@@ -842,4 +848,4 @@ export function lruSimulation() {
 
 ## 8 文档更新日期
 
-2024年5月26日
+2024年6月4日

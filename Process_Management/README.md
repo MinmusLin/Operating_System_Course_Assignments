@@ -57,16 +57,13 @@
 * `Demonstration.gif`
 项目演示
 
-* `Program.exe`
-可执行程序
-
 ### 1.4 项目运行
 
-#### 1.4.1 通过可执行文件运行
+#### 1.4.1 直接运行
 
-* 双击运行 `Program.exe`
+* 下载 [Release]() 双击运行 `Process_Management.exe`
 
-#### 1.4.2 通过 Python 脚本运行
+#### 1.4.2 编译运行
 
 * 搭建 PyQt5 开发环境
 
@@ -942,4 +939,4 @@ class ElevatorController(QThread):
 
 ## 7 文档更新日期
 
-2024年5月7日
+2024年6月4日

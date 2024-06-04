@@ -1,12 +1,10 @@
 # File Management
 
-[TOC]
-
 ## 1 项目介绍
 
 ### 1.1 项目简介
 
-**File Management: Virtual file system manager (VFSM)**
+**File management: Virtual file system manager (VFSM)**
 
 **文件管理项目：虚拟文件系统管理器**
 
@@ -66,12 +64,19 @@
 * `Demonstration.gif`
 项目演示
 
-* `Program.exe`
-可执行程序
-
 ### 1.4 项目运行
 
-* 双击运行 `Program.exe`
+#### 1.4.1 直接运行
+
+* 下载 [Release]() 双击运行 `File_Management.exe`
+
+#### 1.4.2 编译运行
+
+* 安装 [Microsoft .NET Core 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+
+* 安装 [JetBrains Rider 2024.1.2](https://www.jetbrains.com/rider)
+
+* 通过 JetBrains Rider 打开 `File_Management.sln` 并运行 `File_Management`
 
 ## 2 开发环境
 
@@ -84,6 +89,7 @@
   * Microsoft .NET Core 8.0 SDK
 * 开发软件
   * JetBrains Rider 2024.1.2
+  * Microsoft Visual Studio 2022
 * 开发语言
   * C#
 

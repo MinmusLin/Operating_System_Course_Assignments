@@ -370,7 +370,7 @@
             MinimumSize = new Size(940, 668);
             Name = "MainWindow";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "File Management | 文件管理 - Virtual File System Manager (VFSM) | 虚拟文件系统管理器 - 2250758 林继申";
+            Text = "File Management - Virtual File System Manager (VFSM) | 文件管理 - 虚拟文件系统管理器";
             FormClosing += MainWindowClose;
             Menu.ResumeLayout(false);
             Menu.PerformLayout();
