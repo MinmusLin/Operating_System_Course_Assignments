@@ -26,9 +26,15 @@ A collection of my operating system course assignments.
 
 ## 项目展示
 
+### 文件管理项目：虚拟文件系统管理器
+
 ![](File_Management/Demonstration.gif)
 
+### 内存管理项目：动态分区分配方式模拟和请求分页分配方式模拟
+
 ![](Memory_Management/Demonstration.gif)
+
+### 进程管理项目：电梯调度
 
 ![](Process_Management/Demonstration.gif)
 
