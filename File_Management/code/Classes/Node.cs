@@ -2,18 +2,20 @@
 
 namespace File_Management.Classes;
 
+// 目录节点类
 [Serializable]
 public class Node
 {
 #pragma warning disable CA2211
-    public static int counter;
+    public static int counter; // 计数器
 #pragma warning restore CA2211
-    public int FileId;
-    public string FileName = null!;
-    public string FileType;
-    public Node FatherNode;
-    public List<Node> ChildNode;
+    public int FileId; // 文件 ID
+    public string FileName = null!; // 文件名
+    public string FileType; // 文件类型
+    public Node FatherNode; // 文件父节点
+    public List<Node> ChildNode; // 文件子节点
 
+    // 构造函数
     public Node()
     {
         FileId = counter++;
@@ -22,6 +24,7 @@ public class Node
         ChildNode = new List<Node>();
     }
 
+    // 构造函数
     public Node(string fileName, string fileType)
     {
         FileId = counter++;
@@ -31,6 +34,7 @@ public class Node
         ChildNode = new List<Node>();
     }
 
+    // 构造函数
     [JsonConstructor]
     public Node(string fileName, string fileType, int fileId, Node fatherNode, List<Node> childNode)
     {
@@ -41,12 +45,14 @@ public class Node
         ChildNode = childNode;
     }
 
+    // 添加文件子节点
     public void AddChildNode(Node childNode)
     {
         ChildNode.Add(childNode);
         childNode.FatherNode = this;
     }
 
+    // 移除文件子节点
     public void RemoveChildNode(Node childNode)
     {
         ChildNode.Remove(childNode);

@@ -2,25 +2,28 @@
 
 namespace File_Management.Classes;
 
+// 文件元数据类
 [Serializable]
 public class Metadata
 {
-    public int FileId;
-    public string FileName;
-    public string FileSize;
-    public string FileType = "";
-    public string FilePath = "";
-    public DateTime ModifiedTime;
-    public Table FileTable;
+    public int FileId; // 文件 ID
+    public string FileName; // 文件名
+    public string FileSize; // 文件大小
+    public string FileType = ""; // 文件类型
+    public string FilePath = ""; // 文件路径
+    public DateTime ModifiedTime; // 修改时间
+    public Table FileIndexTable; // 文件索引表
 
+    // 构造函数
     public Metadata(string fileName, string fileSize)
     {
         FileName = fileName;
         FileSize = fileSize;
         ModifiedTime = DateTime.Now;
-        FileTable = new Table();
+        FileIndexTable = new Table();
     }
 
+    // 构造函数
     public Metadata(Node node, string path = "")
     {
         FileId = node.FileId;
@@ -29,12 +32,13 @@ public class Metadata
         FileType = node.FileType;
         FilePath = path + "\\" + FileName;
         ModifiedTime = DateTime.Now;
-        FileTable = new Table();
+        FileIndexTable = new Table();
     }
 
+    // 构造函数
     [JsonConstructor]
     public Metadata(int fileId, string fileName, string fileType, string fileSize, string filePath,
-        DateTime modifiedTime, Table fileTable)
+        DateTime modifiedTime, Table fileIndexTable)
     {
         FileId = fileId;
         FileName = fileName;
@@ -42,6 +46,6 @@ public class Metadata
         FileSize = fileSize;
         FilePath = filePath;
         ModifiedTime = modifiedTime;
-        FileTable = fileTable;
+        FileIndexTable = fileIndexTable;
     }
 }

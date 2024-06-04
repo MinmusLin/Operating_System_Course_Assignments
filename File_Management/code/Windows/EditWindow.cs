@@ -1,17 +1,18 @@
 ﻿using System.Text.RegularExpressions;
 using File_Management.Classes;
 
-namespace File_Management.Window;
+namespace File_Management.Windows;
 
+// 文本编辑窗口类
 public partial class EditWindow : Form
 {
-    private bool changedFlag;
-    private readonly Node node = null!;
-    private readonly Metadata fileMetadata = null!;
-    private readonly Dictionary<int, Pair> fileDictionary = null!;
-    private readonly Manager manager = null!;
-    private readonly string fileSize = null!;
-    public DelegateMethod.DelegateFunction CallBack = null!;
+    private bool changedFlag; // 修改标记
+    private readonly Node node = null!; // 目录节点
+    private readonly Metadata fileMetadata = null!; // 文件元数据
+    private readonly Dictionary<int, Pair> fileDictionary = null!; // 文件字典
+    private readonly Manager manager = null!; // 空间分配管理
+    private readonly string fileSize = null!; // 文件大小
+    public DelegateMethod.DelegateFunction UpdateCallback = null!; // 更新回调
 
     // 构造函数
     public EditWindow()
@@ -37,18 +38,18 @@ public partial class EditWindow : Form
     // 读文本文件
     private void ReadText()
     {
-        var indexList = fileMetadata.FileTable.GetDataIndexList();
+        var indexList = fileMetadata.FileIndexTable.GetDataIndexList();
         var text = "";
         foreach (var index in indexList)
         {
             if (manager.GetBlock(index).GetIndex().Count == 0)
             {
-                text += manager.GetBlockInfo(index);
+                text += manager.GetBlock(index).Read();
             }
             else
             {
                 text = manager.GetBlock(index).GetIndex()
-                    .Aggregate(text, (current, idx) => current + manager.GetBlockInfo(idx));
+                    .Aggregate(text, (current, idx) => current + manager.GetBlock(idx).Read());
             }
         }
 
@@ -60,8 +61,8 @@ public partial class EditWindow : Form
     {
         var text = Text.Text;
         fileMetadata.FileSize = text.Length * 4 + "B";
-        manager.Remove(fileMetadata.FileTable.GetDataIndexList());
-        fileMetadata.FileTable = manager.Write(text);
+        manager.Remove(fileMetadata.FileIndexTable.GetDataIndexList());
+        fileMetadata.FileIndexTable = manager.Write(text);
     }
 
     // 更新文本文件大小
@@ -89,14 +90,14 @@ public partial class EditWindow : Form
         changedFlag = true;
     }
 
-    // 文本窗口关闭响应函数
+    // 文本编辑窗口关闭响应函数
     private void EditWindowClose(object sender, FormClosingEventArgs e)
     {
         if (!changedFlag || MessageBox.Show(@"是否保存文本文件？", @"提示", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
         fileMetadata.ModifiedTime = DateTime.Now;
         WriteText();
         UpdateSize(fileSize, fileMetadata.FileSize);
-        CallBack();
+        UpdateCallback();
     }
 
     [GeneratedRegex(@"\d+")]

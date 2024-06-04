@@ -1,4 +1,4 @@
-﻿namespace File_Management.Window
+﻿namespace File_Management.Windows
 {
     partial class MainWindow
     {
@@ -77,7 +77,6 @@
             Menu.Size = new Size(924, 26);
             Menu.TabIndex = 0;
             Menu.Text = "menuStrip1";
-            Menu.ItemClicked += Menu_ItemClicked;
             // 
             // FileMenuItem
             // 

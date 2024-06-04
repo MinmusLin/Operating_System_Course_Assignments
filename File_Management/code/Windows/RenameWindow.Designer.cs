@@ -1,4 +1,4 @@
-﻿namespace File_Management.Window
+﻿namespace File_Management.Windows
 {
     partial class RenameWindow
     {

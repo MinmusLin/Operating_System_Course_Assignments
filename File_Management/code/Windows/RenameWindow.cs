@@ -1,14 +1,15 @@
 ﻿using System.Text.RegularExpressions;
 using File_Management.Classes;
 
-namespace File_Management.Window;
+namespace File_Management.Windows;
 
+// 重命名窗口类
 public partial class RenameWindow : Form
 {
-    private readonly Node sourceNode = null!;
-    private readonly Node currentNode = null!;
-    private readonly Metadata fileMetadata = null!;
-    public DelegateMethod.DelegateFunction UpdateCallback = null!;
+    private readonly Node sourceNode = null!; // 源目录节点
+    private readonly Node currentNode = null!; // 当前目录节点
+    private readonly Metadata fileMetadata = null!; // 文件元数据
+    public DelegateMethod.DelegateFunction UpdateCallback = null!; // 更新回调
 
     // 构造函数
     public RenameWindow()

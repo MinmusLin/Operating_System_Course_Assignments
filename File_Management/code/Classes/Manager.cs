@@ -2,14 +2,16 @@
 
 namespace File_Management.Classes;
 
+// 空间分配管理类
 [Serializable]
 public class Manager
 {
-    public const int Capacity = 1000000;
-    private Block[] blocks;
-    private bool[] bitMap;
-    private int bitIndex;
+    public const int Capacity = 1000000; // 容量
+    private Block[] blocks; // 文件存储块
+    private bool[] bitMap; // 位图
+    private int bitIndex; // 位索引
 
+    // 构造函数
     [JsonConstructor]
     public Manager()
     {
@@ -19,16 +21,13 @@ public class Manager
         for (var i = 0; i < Capacity; i++) bitMap[i] = true;
     }
 
+    // 获取文件存储块
     public Block GetBlock(int idx)
     {
         return blocks[idx];
     }
 
-    public string GetBlockInfo(int idx)
-    {
-        return blocks[idx].Read();
-    }
-
+    // 分配文件存储块
     public int AllocateBlock()
     {
         bitIndex %= Capacity;
@@ -49,17 +48,20 @@ public class Manager
         return -1;
     }
 
+    // 移除索引
     public void Remove(int idx)
     {
         bitMap[idx] = true;
         foreach (var index in blocks[idx].GetIndex()) bitMap[index] = true;
     }
 
+    // 移除索引表
     public void Remove(List<int> indexList)
     {
         foreach (int index in indexList) Remove(index);
     }
 
+    // 写操作
     public Table Write(string data)
     {
         var table = new Table();

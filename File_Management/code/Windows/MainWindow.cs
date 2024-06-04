@@ -1,23 +1,24 @@
 ﻿#pragma warning disable SYSLIB0011
 
 using System.Globalization;
-using System.Text.RegularExpressions;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.RegularExpressions;
 using File_Management.Classes;
 
-namespace File_Management.Window;
+namespace File_Management.Windows;
 
+// 主窗口类
 public partial class MainWindow : Form
 {
-    private bool changedFlag;
-    private Node rootNode = null!;
-    private Node currentNode = null!;
-    private Manager manager = null!;
-    private Dictionary<int, Pair> pairDictionary = null!;
-    private readonly string currentPath = Directory.GetCurrentDirectory();
-    private Dictionary<int, ListViewItem> listViewItemDirectory = null!;
-    private TreeNode rootTreeNode = null!;
-    private Stack<Node> nodeStack = null!;
+    private bool changedFlag; // 修改标记
+    private Node rootNode = null!; // 根目录节点
+    private Node currentNode = null!; // 当前目录节点
+    private Manager manager = null!; // 空间分配管理
+    private Dictionary<int, Pair> pairDictionary = null!; // 目录节点与文件元数据关联类字典
+    private readonly string currentPath = Directory.GetCurrentDirectory(); // 当前路径
+    private Dictionary<int, ListViewItem> listViewItemDirectory = null!; // 文件列表视图项字典
+    private TreeNode rootTreeNode = null!;  // 目录树根节点
+    private Stack<Node> nodeStack = null!; // 目录节点栈
 
     // 构造函数
     public MainWindow()
@@ -128,7 +129,7 @@ public partial class MainWindow : Form
             case "文本文件":
                 {
                     var txtInputWindow = new EditWindow(node, metadata, pairDictionary, manager, fileSize);
-                    txtInputWindow.CallBack = UpdateFileView;
+                    txtInputWindow.UpdateCallback = UpdateFileView;
                     txtInputWindow.Show();
                     break;
                 }
@@ -149,7 +150,7 @@ public partial class MainWindow : Form
         {
             var fileId = GetFileId(item);
             var metadata = pairDictionary[fileId].Metadata;
-            var indexList = metadata.FileTable.GetDataIndexList();
+            var indexList = metadata.FileIndexTable.GetDataIndexList();
             manager.Remove(indexList);
             currentNode.RemoveChildNode(pairDictionary[fileId].Node);
             pairDictionary.Remove(fileId);
@@ -196,7 +197,7 @@ public partial class MainWindow : Form
                 content += line;
         Node.counter = int.Parse(content);
         InitializeFileView();
-        MessageBox.Show(@"从本地加载虚拟磁盘文件", @"提示");
+        MessageBox.Show(@"从本地加载虚拟磁盘文件成功", @"提示");
     }
 
     // 保存虚拟磁盘文件至本地
