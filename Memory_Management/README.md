@@ -106,7 +106,7 @@
 
 #### 1.4.1 直接运行
 
-* 下载 [Release]() 部署 `Memory_Management` 在服务器上运行
+* 下载 [Release](https://github.com/MinmusLin/Operating_System_Course_Assignments/releases/tag/MemoryManagement-v1.0) 部署 `Memory_Management` 在服务器上运行
 
 #### 1.4.2 编译运行
 

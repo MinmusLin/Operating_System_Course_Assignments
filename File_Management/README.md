@@ -68,7 +68,7 @@
 
 #### 1.4.1 直接运行
 
-* 下载 [Release]() 双击运行 `File_Management.exe`
+* 下载 [Release](https://github.com/MinmusLin/Operating_System_Course_Assignments/releases/tag/FileManagement-v1.0) 双击运行 `File_Management.exe`
 
 #### 1.4.2 编译运行
 
