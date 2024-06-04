@@ -58,6 +58,7 @@
             MinimizeBox = false;
             MinimumSize = new Size(800, 600);
             Name = "EditWindow";
+            StartPosition = FormStartPosition.CenterScreen;
             FormClosing += EditWindowClose;
             ResumeLayout(false);
         }

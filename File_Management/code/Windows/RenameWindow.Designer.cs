@@ -82,6 +82,7 @@
             MinimizeBox = false;
             MinimumSize = new Size(247, 127);
             Name = "RenameWindow";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "重命名";
             ResumeLayout(false);
             PerformLayout();
