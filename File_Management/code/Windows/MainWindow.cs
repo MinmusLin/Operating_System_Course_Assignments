@@ -391,9 +391,4 @@ public partial class MainWindow : Form
 
     [GeneratedRegex(@"\(\d+\)[^(\(\d+\))]*$")]
     private static partial Regex Regex4();
-
-    private void MainWindow_Load(object sender, EventArgs e)
-    {
-
-    }
 }

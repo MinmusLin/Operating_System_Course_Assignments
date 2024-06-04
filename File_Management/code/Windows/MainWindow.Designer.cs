@@ -371,7 +371,6 @@
             Name = "MainWindow";
             Text = "File Management | 文件管理 - Virtual File System Manager (VFSM) | 虚拟文件系统管理器 - 2250758 林继申";
             FormClosing += MainWindowClose;
-            Load += MainWindow_Load;
             Menu.ResumeLayout(false);
             Menu.PerformLayout();
             ContextMenu.ResumeLayout(false);
