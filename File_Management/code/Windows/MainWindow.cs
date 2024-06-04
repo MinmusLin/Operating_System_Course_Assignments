@@ -141,7 +141,7 @@ public partial class MainWindow : Form
     {
         if (FileListView.SelectedItems.Count == 0)
         {
-            MessageBox.Show(@"请选中一个文件或文件夹", @"提示");
+            MessageBox.Show(@"删除操作失败：请选中一个文件或文件夹", @"提示");
             return;
         }
 
@@ -164,7 +164,7 @@ public partial class MainWindow : Form
     {
         if (FileListView.SelectedItems.Count != 1)
         {
-            MessageBox.Show(@"请选中一个文件或文件夹", @"提示");
+            MessageBox.Show(@"重命名操作失败：请选中一个文件或文件夹", @"提示");
             return;
         }
 
@@ -247,7 +247,7 @@ public partial class MainWindow : Form
     {
         if (FileListView.SelectedItems.Count != 1)
         {
-            MessageBox.Show(@"请选中一个文件或文件夹", @"提示");
+            MessageBox.Show(@"打开操作失败：请选中一个文件或文件夹", @"提示");
             return;
         }
 
@@ -346,7 +346,7 @@ public partial class MainWindow : Form
     private int GetFileId(ListViewItem item)
     {
         foreach (var kvp in listViewItemDirectory.Where(kvp => kvp.Value.Text == item.Text)) return kvp.Key;
-        MessageBox.Show(@"未找到该文件或文件夹", @"提示");
+        MessageBox.Show(@"获取文件 ID 失败：未找到该文件或文件夹", @"提示");
         return -1;
     }
 
