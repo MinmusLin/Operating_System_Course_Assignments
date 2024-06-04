@@ -16,14 +16,22 @@ A collection of my operating system course assignments.
 ## 仓库组成
 
 * [File Management](File_Management)
-文件管理项目
+文件管理项目：虚拟文件系统管理器
 
 * [Memory Management](Memory_Management)
-内存管理项目
+内存管理项目：动态分区分配方式模拟和请求分页分配方式模拟
 
 * [Process Management](Process_Management)
-进程管理项目
+进程管理项目：电梯调度
+
+## 项目展示
+
+![](File_Management/Demonstration.gif)
+
+![](Memory_Management/Demonstration.gif)
+
+![](Process_Management/Demonstration.gif)
 
 ## 文档更新日期
 
-2024年4月22日
+2024年6月4日
