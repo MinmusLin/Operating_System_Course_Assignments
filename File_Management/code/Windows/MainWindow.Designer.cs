@@ -35,6 +35,7 @@
             FileMenuItem = new ToolStripMenuItem();
             LoadDropdownItem = new ToolStripMenuItem();
             SaveDropdownItem = new ToolStripMenuItem();
+            DropdownItemSeparator = new ToolStripSeparator();
             ResetDropdownItem = new ToolStripMenuItem();
             OperationMenuItem = new ToolStripMenuItem();
             CreateDropdownItem = new ToolStripMenuItem();
@@ -60,7 +61,6 @@
             OpenContextMenuItem = new ToolStripMenuItem();
             DeleteContextMenuItem = new ToolStripMenuItem();
             RenameContextMenuItem = new ToolStripMenuItem();
-            DropdownItemSeparator = new ToolStripSeparator();
             Menu.SuspendLayout();
             ContextMenu.SuspendLayout();
             SuspendLayout();
@@ -105,6 +105,11 @@
             SaveDropdownItem.Text = "保存至本地";
             SaveDropdownItem.Click += SaveOperationClick;
             // 
+            // DropdownItemSeparator
+            // 
+            DropdownItemSeparator.Name = "DropdownItemSeparator";
+            DropdownItemSeparator.Size = new Size(203, 6);
+            // 
             // ResetDropdownItem
             // 
             ResetDropdownItem.Image = (Image)resources.GetObject("ResetDropdownItem.Image");
@@ -127,7 +132,7 @@
             CreateDropdownItem.DropDownItems.AddRange(new ToolStripItem[] { TextDropdownItem, FolderDropdownItem });
             CreateDropdownItem.Image = (Image)resources.GetObject("CreateDropdownItem.Image");
             CreateDropdownItem.Name = "CreateDropdownItem";
-            CreateDropdownItem.Size = new Size(188, 30);
+            CreateDropdownItem.Size = new Size(181, 30);
             CreateDropdownItem.Text = "新建";
             // 
             // TextDropdownItem
@@ -153,7 +158,7 @@
             OpenDropdownItem.Image = (Image)resources.GetObject("OpenDropdownItem.Image");
             OpenDropdownItem.Name = "OpenDropdownItem";
             OpenDropdownItem.ShortcutKeys = Keys.Control | Keys.O;
-            OpenDropdownItem.Size = new Size(188, 30);
+            OpenDropdownItem.Size = new Size(181, 30);
             OpenDropdownItem.Text = "打开";
             OpenDropdownItem.Click += OpenOperationClick;
             // 
@@ -162,7 +167,7 @@
             DeleteDropdownItem.Image = (Image)resources.GetObject("DeleteDropdownItem.Image");
             DeleteDropdownItem.Name = "DeleteDropdownItem";
             DeleteDropdownItem.ShortcutKeys = Keys.Control | Keys.D;
-            DeleteDropdownItem.Size = new Size(188, 30);
+            DeleteDropdownItem.Size = new Size(181, 30);
             DeleteDropdownItem.Text = "删除";
             DeleteDropdownItem.Click += DeleteOperationClick;
             // 
@@ -171,7 +176,7 @@
             RenameDropdownItem.Image = (Image)resources.GetObject("RenameDropdownItem.Image");
             RenameDropdownItem.Name = "RenameDropdownItem";
             RenameDropdownItem.ShortcutKeys = Keys.Control | Keys.N;
-            RenameDropdownItem.Size = new Size(188, 30);
+            RenameDropdownItem.Size = new Size(181, 30);
             RenameDropdownItem.Text = "重命名";
             RenameDropdownItem.Click += RenameOperationClick;
             // 
@@ -345,11 +350,6 @@
             RenameContextMenuItem.Text = "重命名";
             RenameContextMenuItem.Click += RenameOperationClick;
             // 
-            // DropdownItemSeparator
-            // 
-            DropdownItemSeparator.Name = "DropdownItemSeparator";
-            DropdownItemSeparator.Size = new Size(203, 6);
-            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
@@ -364,7 +364,6 @@
             Controls.Add(Menu);
             Font = new Font("Microsoft YaHei UI", 10F);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            ImeMode = ImeMode.On;
             Margin = new Padding(2, 1, 2, 1);
             MaximizeBox = false;
             MaximumSize = new Size(940, 668);
@@ -372,6 +371,7 @@
             Name = "MainWindow";
             Text = "File Management | 文件管理 - Virtual File System Manager (VFSM) | 虚拟文件系统管理器 - 2250758 林继申";
             FormClosing += MainWindowClose;
+            Load += MainWindow_Load;
             Menu.ResumeLayout(false);
             Menu.PerformLayout();
             ContextMenu.ResumeLayout(false);

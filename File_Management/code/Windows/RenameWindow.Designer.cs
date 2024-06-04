@@ -82,7 +82,6 @@
             MinimizeBox = false;
             MinimumSize = new Size(247, 127);
             Name = "RenameWindow";
-            ShowInTaskbar = false;
             Text = "重命名";
             ResumeLayout(false);
             PerformLayout();

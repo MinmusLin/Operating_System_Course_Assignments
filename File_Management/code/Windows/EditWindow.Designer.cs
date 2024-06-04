@@ -34,23 +34,23 @@
             // 
             // Text
             // 
-            Text.Font = new Font("Microsoft YaHei UI", 10.5F);
-            Text.Location = new Point(11, 11);
+            Text.Font = new Font("新宋体", 12F);
+            Text.Location = new Point(11, 9);
             Text.Margin = new Padding(2);
             Text.Name = "Text";
-            Text.Size = new Size(762, 539);
+            Text.Size = new Size(762, 541);
             Text.TabIndex = 0;
             Text.Text = "";
             Text.TextChanged += TextChange;
             // 
             // EditWindow
             // 
-            AutoScaleDimensions = new SizeF(8F, 19F);
+            AutoScaleDimensions = new SizeF(8F, 16F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Window;
             ClientSize = new Size(784, 561);
             Controls.Add(Text);
-            Font = new Font("Microsoft YaHei UI", 10F);
+            Font = new Font("新宋体", 12F);
             Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(2);
             MaximizeBox = false;
