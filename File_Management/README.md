@@ -111,15 +111,15 @@ B(空间分配管理) --- F(Manager\n空间分配管理类)
 A(逻辑类) --- C(物理结构管理)
 C(物理结构管理) --- G(Block\n文件存储块类)
 C(物理结构管理) --- H(Index\n文件索引类)
-C(物理结构管理) --- H(Table\n文件索引表类)
+C(物理结构管理) --- I(Table\n文件索引表类)
 A(逻辑类) --- D(目录结构管理)
-D(目录结构管理) --- I(Node\n目录节点类)
+D(目录结构管理) --- J(Node\n目录节点类)
 A(逻辑类) --- E(数据存储管理)
-E(数据存储管理) --- J(Metadata\n文件元数据类)
-E(数据存储管理) --- K(Pair\n目录节点与文件元数据关联类)
-L(窗口类) --- M(MainWindow\n主窗口类)
-L(窗口类) --- N(EditWindow\n文本编辑窗口类)
-L(窗口类) --- O(RenameWindow\n重命名窗口类)
+E(数据存储管理) --- K(Metadata\n文件元数据类)
+E(数据存储管理) --- L(Pair\n目录节点与文件元数据关联类)
+M(窗口类) --- N(MainWindow\n主窗口类)
+M(窗口类) --- O(EditWindow\n文本编辑窗口类)
+M(窗口类) --- P(RenameWindow\n重命名窗口类)
 ```
 
 #### 3.1.1 逻辑类
@@ -1369,4 +1369,4 @@ private void UpdateSize(string sizeBefore, string sizeAfter)
 
 ## 7 文档更新日期
 
-2024年6月4日
+2024年6月13日
