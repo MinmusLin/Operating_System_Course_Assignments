@@ -1,11 +1,5 @@
 # Operating System Course Assignments
 
-## 仓库名称
-
-Operating_System_Course_Assignments
-
-## 仓库简介
-
 A collection of my operating system course assignments.
 
 2024年同济大学操作系统课程作业合集。
